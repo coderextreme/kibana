@@ -125,13 +125,16 @@ define(function (require) {
                       .data(partition.nodes)
                 .enter()
                 .append('shape')
-                        .attr('class', 'shape');
-
+                        .attr('class', 'shape')
+                        .attr('data-name', function (d, i) { return d.name; })
+      ;
       shape
                 .append('appearance')
                 .append('material')
                         .attr('diffuseColor', function (d, i) { return color(d.name); })
-        ;
+                        .attr('data-index', function (d, i) { return i; })
+                        .attr('class', 'material')
+      ;
       var disk2d = shape
                 .append('disk2d')
                         .attr('solid', 'false')
@@ -140,14 +143,12 @@ define(function (require) {
                                 if (i === 0) {
                                   d.innerRadius = 0;
                                 }
-                                console.log(d.innerRadius, d.outerRadius);
                                 return d.innerRadius;
                               })
                         .attr('outerRadius', function (d, i) {
                                 if (i === 0) {
                                   d.outerRadius = 0;
                                 }
-                                console.log(d.innerRadius, d.outerRadius);
                                 return d.outerRadius;
                               })
         ;
@@ -155,6 +156,7 @@ define(function (require) {
       if (isTooltip) {
         disk2d.call(tooltip.render());
       }
+
 
       return disk2d;
     };
@@ -194,6 +196,8 @@ define(function (require) {
           var slices = data.slices;
           var width = $(this).width();
           var height = $(this).height();
+          d3.ns.qualify('xmlns:xsd');
+          d3.ns.qualify('x3d');
           var x3d = selection.append('X3D')
                 .attr('profile', 'Interchange')
                 .attr('version', '3.3')
@@ -264,6 +268,29 @@ define(function (require) {
           return scene;
         });
         x3dom.reload();
+        $.each(d3.selectAll('shape.shape'), function (s, shapes) {
+          $.each(shapes, function (i, d) {
+            d.addEventListener('mouseover', function (event) {
+              var data = d3.selectAll('material[data-index="' + i + '"]');
+              $.each(data, function (ms, materials) {
+                $.each(materials, function (m, material) {
+                  var diffuseColor = material.getAttribute('diffuseColor');
+                  material.setAttribute('data-diffuseColor', diffuseColor);
+                  material.setAttribute('diffuseColor', '0.5 0.5 0.5');
+                });
+              });
+            });
+            d.addEventListener('mouseout', function (event) {
+              var data = d3.selectAll('material[data-index="' + i + '"]');
+              $.each(data, function (ms, materials) {
+                $.each(materials, function (m, material) {
+                  var diffuseColor = material.getAttribute('data-diffuseColor');
+                  material.setAttribute('diffuseColor', diffuseColor);
+                });
+              });
+            });
+          });
+        });
       };
     };
 
