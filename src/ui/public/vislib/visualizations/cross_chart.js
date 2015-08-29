@@ -1,7 +1,7 @@
 define(function (require) {
   return function CrossChartFactory(Private) {
     var d3 = require('d3');
-    var x3dom = require('x3dom/dist/x3dom-full');
+    var x3dom = require('x3dom/dist/x3dom-kibana');
     var _ = require('lodash');
     var $ = require('jquery');
 
@@ -199,7 +199,8 @@ define(function (require) {
                 .attr('xsd:noNamespaceSchemaLocation', 'http://www.web3d.org/specifications/x3d-3.3.xsd')
                 .attr('height', height)
                 .attr('width', width)
-                .attr('showLog', 'true');
+                .attr('showStats', 'true')
+                .attr('showLog', 'false');
           var scene = x3d.append('Scene');
           document._bindableBag = new x3dom.BindableBag(scene.node());
           document._bindableBag.setRefNode(scene.node());
