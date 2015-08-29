@@ -199,7 +199,7 @@ define(function (require) {
                 .attr('xsd:noNamespaceSchemaLocation', 'http://www.web3d.org/specifications/x3d-3.3.xsd')
                 .attr('height', height)
                 .attr('width', width)
-                .attr('showStats', 'true')
+                .attr('showStat', 'false')
                 .attr('showLog', 'false');
           var scene = x3d.append('Scene');
           document._bindableBag = new x3dom.BindableBag(scene.node());
