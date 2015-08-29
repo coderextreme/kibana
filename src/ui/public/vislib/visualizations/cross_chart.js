@@ -272,7 +272,10 @@ define(function (require) {
           $.each(selection.selectAll('shape.shape'), function (s, shapes) {
             $.each(shapes, function (i, d) {
               i = i % (data.slices.children.length + 1);
-              d.addEventListener('mouseover', function (event) {
+              if (typeof d.mov !== 'undefined') {
+                d.removeEventListener('mouseover', d.mov);
+              }
+              d.mov = d.addEventListener('mouseover', function (event) {
                 var data = selection.selectAll('material[data-index="' + i + '"]');
                 $.each(data, function (ms, materials) {
                   $.each(materials, function (m, material) {
@@ -282,7 +285,10 @@ define(function (require) {
                   });
                 });
               });
-              d.addEventListener('mouseout', function (event) {
+              if (typeof d.mou !== 'undefined') {
+                d.removeEventListener('mouseout', d.mou);
+              }
+              d.mou = d.addEventListener('mouseout', function (event) {
                 var data = selection.selectAll('material[data-index="' + i + '"]');
                 $.each(data, function (ms, materials) {
                   $.each(materials, function (m, material) {
