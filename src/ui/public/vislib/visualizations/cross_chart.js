@@ -268,24 +268,27 @@ define(function (require) {
           return scene;
         });
         x3dom.reload();
-        $.each(selection.selectAll('shape.shape'), function (s, shapes) {
-          $.each(shapes, function (i, d) {
-            d.addEventListener('mouseover', function (event) {
-              var data = selection.selectAll('material[data-index="' + i + '"]');
-              $.each(data, function (ms, materials) {
-                $.each(materials, function (m, material) {
-                  var diffuseColor = material.getAttribute('diffuseColor');
-                  material.setAttribute('data-diffuseColor', diffuseColor);
-                  material.setAttribute('diffuseColor', '0.5 0.5 0.5');
+        selection.each(function (data) {
+          $.each(selection.selectAll('shape.shape'), function (s, shapes) {
+            $.each(shapes, function (i, d) {
+              i = i % (data.slices.children.length + 1);
+              d.addEventListener('mouseover', function (event) {
+                var data = selection.selectAll('material[data-index="' + i + '"]');
+                $.each(data, function (ms, materials) {
+                  $.each(materials, function (m, material) {
+                    var diffuseColor = material.getAttribute('diffuseColor');
+                    material.setAttribute('data-diffuseColor', diffuseColor);
+                    material.setAttribute('diffuseColor', '0.5 0.5 0.5');
+                  });
                 });
               });
-            });
-            d.addEventListener('mouseout', function (event) {
-              var data = selection.selectAll('material[data-index="' + i + '"]');
-              $.each(data, function (ms, materials) {
-                $.each(materials, function (m, material) {
-                  var diffuseColor = material.getAttribute('data-diffuseColor');
-                  material.setAttribute('diffuseColor', diffuseColor);
+              d.addEventListener('mouseout', function (event) {
+                var data = selection.selectAll('material[data-index="' + i + '"]');
+                $.each(data, function (ms, materials) {
+                  $.each(materials, function (m, material) {
+                    var diffuseColor = material.getAttribute('data-diffuseColor');
+                    material.setAttribute('diffuseColor', diffuseColor);
+                  });
                 });
               });
             });
