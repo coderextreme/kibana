@@ -78,7 +78,8 @@ define(function (require) {
           child.innerRadius = innerSum / sum;
           child.outerRadius = Math.abs(child.size) / sum + child.innerRadius;
           innerSum += Math.abs(child.size);
-          child.percentOfParent = child.outerRadius;
+          child.percentOfGroup = Math.abs(child.size) / sum;
+          child.percentOfParent = child.percentOfGroup;
 
           if (parentPercent != null) {
             child.percentOfParent *= parentPercent;
