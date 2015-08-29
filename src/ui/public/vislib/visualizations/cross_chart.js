@@ -268,10 +268,10 @@ define(function (require) {
           return scene;
         });
         x3dom.reload();
-        $.each(d3.selectAll('shape.shape'), function (s, shapes) {
+        $.each(selection.selectAll('shape.shape'), function (s, shapes) {
           $.each(shapes, function (i, d) {
             d.addEventListener('mouseover', function (event) {
-              var data = d3.selectAll('material[data-index="' + i + '"]');
+              var data = selection.selectAll('material[data-index="' + i + '"]');
               $.each(data, function (ms, materials) {
                 $.each(materials, function (m, material) {
                   var diffuseColor = material.getAttribute('diffuseColor');
@@ -281,7 +281,7 @@ define(function (require) {
               });
             });
             d.addEventListener('mouseout', function (event) {
-              var data = d3.selectAll('material[data-index="' + i + '"]');
+              var data = selection.selectAll('material[data-index="' + i + '"]');
               $.each(data, function (ms, materials) {
                 $.each(materials, function (m, material) {
                   var diffuseColor = material.getAttribute('data-diffuseColor');
