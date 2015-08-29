@@ -1,0 +1,22 @@
+{
+  "name": "k3bana",
+  "version": "4.1.1",
+  "homepage": "https://github.com/coderextreme/kibana",
+  "description": "JSON visualization",
+  "keywords": [
+    "x3dom"
+  ],
+  "authors": [
+    "X3DOM"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "x3dom": "x3dom/x3dom#1.7.0"
+  }
+}

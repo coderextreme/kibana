@@ -1,6 +1,6 @@
 require('plugins/appSwitcher/appSwitcher.less');
 
-var kibanaLogoUrl = require('ui/images/kibana.png');
+var kibanaLogoUrl = require('ui/images/k3bana.png');
 
 require('ui/chrome')
 .setBrand({

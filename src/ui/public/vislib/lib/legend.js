@@ -64,6 +64,7 @@ define(function (require) {
 
     Legend.prototype._getLabels = function (data, type) {
       if (type === 'pie') return this._getPieLabels(data);
+      if (type === 'cross') return this._getPieLabels(data);
       return this._getSeriesLabels(data);
     };
 

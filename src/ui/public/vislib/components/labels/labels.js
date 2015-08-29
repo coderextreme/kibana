@@ -16,6 +16,7 @@ define(function (require) {
     return function (obj, chartType) {
       if (!_.isObject(obj)) { throw new TypeError('LabelUtil expects an object'); }
       if (chartType === 'pie') { return getPieLabels(obj); }
+      if (chartType === 'cross') { return getPieLabels(obj); }
       return getArrOfUniqLabels(createArr(obj));
     };
   };

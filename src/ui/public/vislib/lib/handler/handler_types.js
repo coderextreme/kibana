@@ -11,6 +11,7 @@ define(function (require) {
       histogram: pointSeries.column,
       line: pointSeries.line,
       pie: Private(require('ui/vislib/lib/handler/types/pie')),
+      cross: Private(require('ui/vislib/lib/handler/types/cross')),
       area: pointSeries.area,
       tile_map: Private(require('ui/vislib/lib/handler/types/tile_map'))
     };

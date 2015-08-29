@@ -660,6 +660,11 @@ define(function (require) {
         return d.label;
       }));
     };
+    Data.prototype.getCrossColorFunc = function () {
+      return color(this.pieNames(this.getVisData()).map(function (d) {
+        return d.label;
+      }));
+    };
 
     /**
      * ensure that the datas ordered property has a min and max

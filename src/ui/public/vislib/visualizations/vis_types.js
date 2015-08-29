@@ -12,6 +12,7 @@ define(function (require) {
     return {
       histogram: Private(require('ui/vislib/visualizations/column_chart')),
       pie: Private(require('ui/vislib/visualizations/pie_chart')),
+      cross: Private(require('ui/vislib/visualizations/cross_chart')),
       line: Private(require('ui/vislib/visualizations/line_chart')),
       area: Private(require('ui/vislib/visualizations/area_chart')),
       tile_map: Private(require('ui/vislib/visualizations/tile_map'))

@@ -245,6 +245,12 @@ define(function (require) {
       errors.PieContainsAllZeros);
   };
   _.class(errors.PieContainsAllZeros).inherits(KbnError);
+  errors.CrossContainsAllZeros = function CrossContainsAllZeros() {
+    KbnError.call(this,
+      'No results displayed because all values equal 0',
+      errors.CrossContainsAllZeros);
+  };
+  _.class(errors.CrossContainsAllZeros).inherits(KbnError);
 
   /**
    * error thrown when no results are returned from an elasticsearch query
