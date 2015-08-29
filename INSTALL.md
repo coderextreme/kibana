@@ -10,3 +10,4 @@ cat dist/x3dom-full.js >> ${X3DOM}
 echo '  if (typeof define === "function" && define.amd) define(x3dom); else if (typeof module === "object" && module.exports) module.exports = x3dom;' >> ${X3DOM}
 echo '  this.x3dom = x3dom;' >> ${X3DOM}
 echo '}();' >> ${X3DOM}
+open https://www.youtube.com/watch?v=AZbO2Y8NNS8
