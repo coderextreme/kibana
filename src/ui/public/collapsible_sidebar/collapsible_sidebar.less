@@ -1,29 +1,26 @@
-.sidebar-container.collapsible-sidebar {
+@import (reference) "~ui/styles/variables";
+
+.collapsible-sidebar {
   position: relative;
   z-index: 1;
 
   .sidebar-collapser {
-    background-color: #ecf0f1;
-    height: 28px;
     position: absolute;
     top: 0;
-    right: -20px;
-    width: 20px;
-    border: 1px solid #ecf0f1;
-    border-width: 0 1px 1px 0;
+    right: -(@collapser-width);
+    width: @collapser-width;
     cursor: pointer;
     z-index: -1;
-    border-bottom-right-radius: 4px;
 
     .chevron-cont{
       position: absolute;
-      left: 4px;
+      left: 5px;
       top: 5px;
+      color: @kibanaGray4;
 
       &:before {
         font-family: FontAwesome;
-        color: #333;
-        content: "\F053";
+        content: "\F137";
       }
     }
   }
@@ -40,14 +37,14 @@
     .sidebar-collapser {
       visibility: visible;
       .chevron-cont:before {
-        content: "\F054";
+        content: "\F138";
       }
     }
   }
 }
 
 @media (max-width: 992px) {
-  .sidebar-container.collapsible-sidebar {
+  .collapsible-sidebar {
     &.closed {
       display: none;
     }

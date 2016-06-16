@@ -1,10 +1,22 @@
-module.exports = function (grunt) {
-  let { compact } = require('lodash');
+import { compact } from 'lodash';
+import { delimiter } from 'path';
 
-  grunt.registerTask('jenkins', 'Jenkins build script', compact([
-    'esvm:dev',
-    'test',
-    process.env.JOB_NAME === 'kibana_core' ? 'build' : null
-  ]));
+module.exports = function (grunt) {
+  grunt.registerTask('jenkins', 'Jenkins build script', function () {
+    // make sure JAVA_HOME points to JDK8
+    const HOME = '/usr/lib/jvm/jdk8';
+    process.env.JAVA_HOME = HOME;
+
+    // extend PATH to point to JDK8
+    const path = process.env.PATH.split(delimiter);
+    path.unshift(`${HOME}/bin`);
+    process.env.PATH = path.join(delimiter);
+
+    grunt.task.run(compact([
+      'rejectRejFiles',
+      'test',
+      process.env.JOB_NAME === 'kibana_core' ? 'build' : null
+    ]));
+  });
 
 };

@@ -1,63 +1,73 @@
-define(function () {
-  return function MappedColorFactory() {
+import _ from 'lodash';
+import d3 from 'd3';
+import VislibComponentsColorColorPaletteProvider from 'ui/vislib/components/color/color_palette';
+define((require) => (Private, config, $rootScope) => {
+  const createColorPalette = Private(VislibComponentsColorColorPaletteProvider);
 
-    var _ = require('lodash');
-    /*
-     * Maintains a lookup table that associates the value (key) with a hex color (value)
-     * across the visualizations.
-     * Provides functions to interact with the lookup table
-     */
+  const standardizeColor = (color) => d3.rgb(color).toString();
+  function getConfigColorMapping() {
+    return _.mapValues(config.get('visualization:colorMapping'), standardizeColor);
+  }
 
-    var MappedColorService = function () {
-    };
+  /*
+   * Maintains a lookup table that associates the value (key) with a hex color (value)
+   * across the visualizations.
+   * Provides functions to interact with the lookup table
+   */
+  class MappedColors {
 
-    MappedColorService.colors = {};
-    /**
-     * Allows to add value (key) and color (value) to the lookup table
-     *
-     * @method add
-     * @param {String} key - the value in a visualization
-     * @param {String} value - the color associated with the value
-     */
-    MappedColorService.prototype.add = function (key, value) {
-      MappedColorService.colors[key] = value;
-    };
+    constructor() {
+      $rootScope.$on('$routeChangeStart', () => this.purge());
+      this.oldMap = {};
+      this.mapping = {};
+    }
 
-    /**
-     * Provides the color (value) associated with the value (key)
-     *
-     * @method get
-     * @param {String} key - the value for which color is required
-     * @returns the color associated with the value
-     */
-    MappedColorService.prototype.get = function (key) {
-      return MappedColorService.colors[key];
-    };
+    get(key) {
+      return getConfigColorMapping()[key] || this.mapping[key];
+    }
 
-    /**
-     * Size of the mapped colors
-     *
-     * @method count
-     * @returns the number of values (keys) stored in the lookup table
-     */
-    MappedColorService.prototype.count = function () {
-      return _.keys(MappedColorService.colors).length;
-    };
+    flush() {
+      this.oldMap = _.clone(this.mapping);
+      this.mapping = {};
+    }
 
-    /**
-     * All the colors of in the lookup table
-     *
-     * @method all
-     * @returns all the colors used in the lookup table
-     */
-    MappedColorService.prototype.all = function () {
-      return _.values(MappedColorService.colors);
-    };
+    purge() {
+      this.oldMap = {};
+      this.mapping = {};
+    }
 
-    MappedColorService.prototype.reset = function () {
-      MappedColorService.colors = {};
-    };
+    mapKeys(keys) {
+      const configMapping = getConfigColorMapping();
+      const configColors = _.values(configMapping);
+      const oldColors = _.values(this.oldMap);
 
-    return MappedColorService;
-  };
+      const keysToMap = [];
+      _.each(keys, (key) => {
+        // If this key is mapped in the config, it's unnecessary to have it mapped here
+        if (configMapping[key]) delete this.mapping[key];
+
+        // If this key is mapped to a color used by the config color mapping, we need to remap it
+        if (_.contains(configColors, this.mapping[key])) keysToMap.push(key);
+
+        // if key exist in oldMap, move it to mapping
+        if (this.oldMap[key]) this.mapping[key] = this.oldMap[key];
+
+        // If this key isn't mapped, we need to map it
+        if (this.get(key) == null) keysToMap.push(key);
+      });
+
+      // Generate a color palette big enough that all new keys can have unique color values
+      const allColors = _(this.mapping).values().union(configColors).union(oldColors).value();
+      const colorPalette = createColorPalette(allColors.length + keysToMap.length);
+      let newColors = _.difference(colorPalette, allColors);
+
+      while (keysToMap.length > newColors.length) {
+        newColors = newColors.concat(_.sample(allColors, keysToMap.length - newColors.length));
+      }
+
+      _.merge(this.mapping, _.zipObject(keysToMap, newColors));
+    }
+  }
+
+  return new MappedColors();
 });

@@ -1,17 +1,21 @@
-var _ = require('lodash');
-var Promise = require('bluebird');
-var sinon = require('sinon');
+import _ from 'lodash';
+import Promise from 'bluebird';
+import sinon from 'sinon';
+import expect from 'expect.js';
+import url from 'url';
+import SetupError from '../setup_error';
 
-var checkEsVersion = require('../check_es_version');
+import serverConfig from '../../../../../test/server_config';
+import checkEsVersion from '../check_es_version';
 
 describe('plugins/elasticsearch', function () {
   describe('lib/check_es_version', function () {
-    var server;
-    var plugin;
+    let server;
+    let plugin;
 
     beforeEach(function () {
-      var get = sinon.stub().withArgs('elasticserach.minimumVerison').returns('1.4.3');
-      var config = function () { return { get: get }; };
+      const get = sinon.stub().withArgs('elasticsearch.engineVersion').returns('^1.4.3');
+      const config = function () { return { get: get }; };
       server = {
         log: _.noop,
         config: config,
@@ -22,22 +26,23 @@ describe('plugins/elasticsearch', function () {
             },
             status: {
               red: sinon.stub()
-            }
+            },
+            url: url.format(serverConfig.servers.elasticsearch)
           }
         }
       };
     });
 
     function setNodes(/* ...versions */) {
-      var versions = _.shuffle(arguments);
-      var nodes = {};
-      var i = 0;
+      const versions = _.shuffle(arguments);
+      const nodes = {};
+      let i = 0;
 
       while (versions.length) {
-        var name = 'node-' + (++i);
-        var version = versions.shift();
+        const name = 'node-' + (++i);
+        const version = versions.shift();
 
-        var node = {
+        const node = {
           version: version,
           http_address: 'http_address',
           ip: 'ip'
@@ -47,7 +52,7 @@ describe('plugins/elasticsearch', function () {
         nodes[name] = node;
       }
 
-      var client = server.plugins.elasticsearch.client;
+      const client = server.plugins.elasticsearch.client;
       client.nodes.info = sinon.stub().returns(Promise.resolve({ nodes: nodes }));
 
     }
@@ -64,20 +69,24 @@ describe('plugins/elasticsearch', function () {
 
     it('fails with a single node that is out of date', function () {
       setNodes('1.4.4', '1.4.2', '1.4.5');
-      return checkEsVersion(server)
-      .then(function () {
-        throw new Error('expected validation to fail');
-      }, _.noop);
+
+      checkEsVersion(server)
+      .catch(function (e) {
+        expect(e).to.be.a(SetupError);
+      });
     });
 
-    it('passes if that single node is a client node', function () {
+    it('fails if that single node is a client node', function () {
       setNodes(
         '1.4.4',
         { version: '1.4.2', attributes: { client: 'true' } },
         '1.4.5'
       );
 
-      return checkEsVersion(server);
+      checkEsVersion(server)
+      .catch(function (e) {
+        expect(e).to.be.a(SetupError);
+      });
     });
 
   });

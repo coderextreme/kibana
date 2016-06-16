@@ -1,21 +1,23 @@
 
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var _ = require('lodash');
-var $ = require('jquery');
-var d3 = require('d3');
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import _ from 'lodash';
+import d3 from 'd3';
 
 // Data
-var series = require('fixtures/vislib/mock_data/date_histogram/_series');
-var seriesPosNeg = require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg');
-var seriesNeg = require('fixtures/vislib/mock_data/date_histogram/_series_neg');
-var termsColumns = require('fixtures/vislib/mock_data/terms/_columns');
-//var histogramRows = require('fixtures/vislib/mock_data/histogram/_rows');
-var stackedSeries = require('fixtures/vislib/mock_data/date_histogram/_stacked_series');
+import series from 'fixtures/vislib/mock_data/date_histogram/_series';
+import seriesPosNeg from 'fixtures/vislib/mock_data/date_histogram/_series_pos_neg';
+import seriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg';
+import termsColumns from 'fixtures/vislib/mock_data/terms/_columns';
+//let histogramRows = require('fixtures/vislib/mock_data/histogram/_rows');
+import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
+import $ from 'jquery';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
 // tuple, with the format [description, mode, data]
-var dataTypesArray = [
+let dataTypesArray = [
   ['series', 'stacked', series],
   ['series with positive and negative values', 'stacked', seriesPosNeg],
   ['series with negative values', 'stacked', seriesNeg],
@@ -25,14 +27,16 @@ var dataTypesArray = [
 ];
 
 dataTypesArray.forEach(function (dataType, i) {
-  var name = dataType[0];
-  var mode = dataType[1];
-  var data = dataType[2];
+  let name = dataType[0];
+  let mode = dataType[1];
+  let data = dataType[2];
 
   describe('Vislib Column Chart Test Suite for ' + name + ' Data', function () {
-    var vis;
-    var visLibParams = {
+    let vis;
+    let persistedState;
+    let visLibParams = {
       type: 'histogram',
+      hasTimeField: true,
       addLegend: true,
       addTooltip: true,
       mode: mode
@@ -40,9 +44,10 @@ dataTypesArray.forEach(function (dataType, i) {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
+      vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+      persistedState = new (Private(PersistedStatePersistedStateProvider))();
       vis.on('brush', _.noop);
-      vis.render(data);
+      vis.render(data, persistedState);
     }));
 
     afterEach(function () {
@@ -51,8 +56,8 @@ dataTypesArray.forEach(function (dataType, i) {
     });
 
     describe('stackData method', function () {
-      var stackedData;
-      var isStacked;
+      let stackedData;
+      let isStacked;
 
       beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
@@ -73,9 +78,9 @@ dataTypesArray.forEach(function (dataType, i) {
 
     describe('addBars method', function () {
       it('should append rects', function () {
-        var numOfSeries;
-        var numOfValues;
-        var product;
+        let numOfSeries;
+        let numOfValues;
+        let product;
 
         vis.handler.charts.forEach(function (chart) {
           numOfSeries = chart.chartData.series.length;
@@ -89,7 +94,7 @@ dataTypesArray.forEach(function (dataType, i) {
     describe('updateBars method', function () {
       beforeEach(function () {
         vis.handler._attr.mode = 'grouped';
-        vis.render(vis.data);
+        vis.render(vis.data, persistedState);
       });
 
       it('should returned grouped bars', function () {
@@ -99,7 +104,7 @@ dataTypesArray.forEach(function (dataType, i) {
 
     describe('addBarEvents method', function () {
       function checkChart(chart) {
-        var rect = $(chart.chartEl).find('.series rect').get(0);
+        let rect = $(chart.chartEl).find('.series rect').get(0);
 
         // check for existance of stuff and things
         return {
@@ -116,23 +121,23 @@ dataTypesArray.forEach(function (dataType, i) {
 
       it('should attach the brush if data is a set of ordered dates', function () {
         vis.handler.charts.forEach(function (chart) {
-          var has = checkChart(chart);
-          var ordered = vis.handler.data.get('ordered');
-          var date = Boolean(ordered && ordered.date);
+          let has = checkChart(chart);
+          let ordered = vis.handler.data.get('ordered');
+          let date = Boolean(ordered && ordered.date);
           expect(has.brush).to.be(date);
         });
       });
 
       it('should attach a click event', function () {
         vis.handler.charts.forEach(function (chart) {
-          var has = checkChart(chart);
+          let has = checkChart(chart);
           expect(has.click).to.be(true);
         });
       });
 
       it('should attach a hover event', function () {
         vis.handler.charts.forEach(function (chart) {
-          var has = checkChart(chart);
+          let has = checkChart(chart);
           expect(has.mouseOver).to.be(true);
         });
       });
@@ -147,7 +152,7 @@ dataTypesArray.forEach(function (dataType, i) {
 
       it('should return a yMin and yMax', function () {
         vis.handler.charts.forEach(function (chart) {
-          var yAxis = chart.handler.yAxis;
+          let yAxis = chart.handler.yAxis;
 
           expect(yAxis.domain[0]).to.not.be(undefined);
           expect(yAxis.domain[1]).to.not.be(undefined);
@@ -156,7 +161,7 @@ dataTypesArray.forEach(function (dataType, i) {
 
       it('should render a zero axis line', function () {
         vis.handler.charts.forEach(function (chart) {
-          var yAxis = chart.handler.yAxis;
+          let yAxis = chart.handler.yAxis;
 
           if (yAxis.yMin < 0 && yAxis.yMax > 0) {
             expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
@@ -183,14 +188,14 @@ dataTypesArray.forEach(function (dataType, i) {
     describe('defaultYExtents is true', function () {
       beforeEach(function () {
         vis._attr.defaultYExtents = true;
-        vis.render(data);
+        vis.render(data, persistedState);
       });
 
       it('should return yAxis extents equal to data extents', function () {
         vis.handler.charts.forEach(function (chart) {
-          var yAxis = chart.handler.yAxis;
-          var min = vis.handler.data.getYMin();
-          var max = vis.handler.data.getYMax();
+          let yAxis = chart.handler.yAxis;
+          let min = vis.handler.data.getYMin();
+          let max = vis.handler.data.getYMax();
 
           expect(yAxis.domain[0]).to.equal(min);
           expect(yAxis.domain[1]).to.equal(max);

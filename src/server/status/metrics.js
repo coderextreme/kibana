@@ -1,16 +1,16 @@
+import _ from 'lodash';
+import Samples from './samples';
 module.exports = function (kbnServer, server, config) {
-  var _ = require('lodash');
-  var Samples = require('./Samples');
   let lastReport = Date.now();
 
   kbnServer.metrics = new Samples(12);
 
-  server.plugins.good.monitor.on('ops', function (event) {
+  server.plugins['even-better'].monitor.on('ops', function (event) {
     let now = Date.now();
     let secSinceLast = (now - lastReport) / 1000;
     lastReport = now;
 
-    var port = config.get('server.port');
+    let port = config.get('server.port');
     let requests = _.get(event, ['requests', port, 'total'], 0);
     let requestsPerSecond = requests / secSinceLast;
 

@@ -1,48 +1,42 @@
-define(function (require) {
-  var modules = require('ui/modules');
-  var _ = require('lodash');
+import modules from 'ui/modules';
+import _ from 'lodash';
 
-  modules.get('kibana/persisted_log')
-  .factory('PersistedLog', function ($window, localStorage) {
-    function PersistedLog(name, options) {
-      options = options || {};
-      this.name = name;
-      this.maxLength = options.maxLength || 0;
-      this.filterDuplicates = options.filterDuplicates || false;
-      this.items = localStorage.get(this.name) || [];
+modules.get('kibana/persisted_log')
+.factory('PersistedLog', function ($window, localStorage) {
+  function PersistedLog(name, options) {
+    options = options || {};
+    this.name = name;
+    this.maxLength = parseInt(options.maxLength, 10);
+    this.filterDuplicates = options.filterDuplicates || false;
+    this.items = localStorage.get(this.name) || [];
+    if (!isNaN(this.maxLength)) this.items = _.take(this.items, this.maxLength);
+  }
+
+  PersistedLog.prototype.add = function (val) {
+    if (val == null) {
+      return this.items;
     }
 
-    PersistedLog.prototype.add = function (val) {
-      if (val == null) {
-        return this.items;
-      }
+    // remove any matching items from the stack if option is set
+    if (this.filterDuplicates) {
+      _.remove(this.items, function (item) {
+        return _.isEqual(item, val);
+      });
+    }
 
-      var stack = this.items;
+    this.items.unshift(val);
 
-      // remove any matching items from the stack if option is set
-      if (this.filterDuplicates) {
-        stack = _.pull(this.items, val);
-        stack = _.filter(stack, function (item) {
-          return !_.isEqual(item, val);
-        });
-      }
+    // if maxLength is set, truncate the stack
+    if (!isNaN(this.maxLength)) this.items = _.take(this.items, this.maxLength);
 
-      stack.unshift(val);
+    // persist the stack
+    localStorage.set(this.name, this.items);
+    return this.items;
+  };
 
-      // if maxLength is set, truncate the stack
-      if (this.maxLength > 0) {
-        stack = stack.slice(0, this.maxLength);
-      }
+  PersistedLog.prototype.get = function () {
+    return this.items;
+  };
 
-      // persist the stack
-      localStorage.set(this.name, stack);
-      return this.items = stack;
-    };
-
-    PersistedLog.prototype.get = function () {
-      return this.items;
-    };
-
-    return PersistedLog;
-  });
+  return PersistedLog;
 });

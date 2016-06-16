@@ -6,16 +6,45 @@
   @vis-editor-nesting-width: 8px;
   @vis-editor-agg-editor-spacing: 5px;
 
+  &-info {
+    line-height: 30px;
+    padding: 0px 10px;
+    border-bottom-left-radius: @border-radius-base;
+
+
+    &-title {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+  }
+
   // For the vis-editor sidebar nav
   .navbar-default .navbar-nav {
-    &> .active > a:before {
-      border: 7px solid transparent;
-      border-bottom-color: @gray-lighter;
+    &> .active > a {
+      border-bottom: 2px solid @kibanaGray2;
+      color: @kibanaGray1;
+      &:before {
+        display: none;
+      }
+      &:hover {
+        background-color: transparent;
+      }
+    }
+
+    > li {
+      > a {
+        padding: 4px 0;
+        margin: 0 10px;
+        color: @kibanaGray2;
+      }
+      > a:hover {
+        border-bottom: 2px solid @kibanaGray2;
+      }
     }
 
     .danger {
-      color: @btn-danger-color;
-      background-color: @btn-danger-bg;
+      color: @vis-editor-navbar-error-state-color;
+      background-color: @vis-editor-navbar-error-state-bg;
     }
   }
 
@@ -35,8 +64,8 @@
         right: 0px;
         bottom: 0px;
         z-index: 10;
-        background: fadeout(@navbar-default-bg, 10%);
-        color: white;
+        background: fadeout(@vis-editor-navbar-modal-bg, 10%);
+        color: @vis-editor-navbar-modal-color;
         text-align: center;
         padding-top: 6px;
 
@@ -50,13 +79,15 @@
       }
 
       a {
-        color: white;
+        color: @vis-editor-navbar-modal-link-color;
       }
     }
   }
 
+
   &-content {
     .flex-parent();
+    z-index: 0;
 
     // overrides for tablet and desktop
     @media (min-width: @screen-md-min) {
@@ -64,20 +95,23 @@
     }
   }
 
-  &-sidebar {
+  .collapsible-sidebar {
     .flex-parent(0, 0, auto);
+  }
 
-    // overflow: auto;
+  &-sidebar {
+    .flex-parent(1, 0, auto);
 
     // overrided for tablet and desktop
     @media (min-width: @screen-md-min) {
       flex-basis: @vis-editor-sidebar-basis;
       min-width: @vis-editor-sidebar-min-width;
       max-width: @vis-editor-sidebar-min-width;
-      // margin-bottom: (@input-height-base * 2) - 3;
     }
 
+    .index-pattern,
     nav {
+      min-height: @app-icon-height;
       border-radius: 0px;
     }
 
@@ -87,8 +121,7 @@
 
     .sidebar-container {
       .flex-parent(1, 1, auto);
-      background-color: @body-bg;
-      border-right-color: @sidebar-bg;
+      background-color: @vis-editor-sidebar-bg;
 
       form {
         .flex-parent(1, 1, auto);
@@ -114,17 +147,11 @@
     }
 
     .sidebar-item-title {
-      font-size: 20px;
+      font-size: 14px;
       font-weight: bold;
       border: inherit !important;
-      background-color: @gray-lighter;
       margin-bottom: @vis-editor-agg-editor-spacing;
       padding: 2px 5px !important;
-    }
-
-    .sidebar-item-title:hover {
-      color: @text-color !important;
-      background-color: @gray-lighter !important;
     }
 
     .hintbox {
@@ -158,7 +185,7 @@
 
     > span {
       width: @vis-editor-nesting-width;
-      background-color: @brand-success;
+      background-color: @vis-editor-nesting-indicator-bg;
     }
   }
 
@@ -177,7 +204,7 @@
 
     &-group {
       .flex-parent(0, 1, auto);
-      color: @text-color;
+      color: @kibanaGray2;
     }
 
     &-header {
@@ -221,8 +248,8 @@
       margin: @vis-editor-agg-editor-spacing 0;
       padding: @vis-editor-agg-editor-spacing;
       text-align: center;
-      background: @btn-danger-bg;
-      color: @btn-danger-color;
+      background: @vis-editor-agg-error-bg;
+      color: @vis-editor-agg-error-color;
     }
 
     &-editor {
@@ -232,16 +259,6 @@
           &:last-child {
             padding-right: 0;
           }
-        }
-      }
-
-      .regex .flags {
-        .docs {
-          text-align: right;
-        }
-
-        a {
-          color: @link-color;
         }
       }
 
@@ -274,24 +291,25 @@
     }
 
     &-wide-btn {
-      border-radius: 0;
-      border-top: 2px solid @gray-lighter;
+      text-align: center;
 
       &-add {
         width: 140px;
         margin: -2px auto 5px auto;
         text-align: center;
-        border: 2px solid @gray-lighter;
+        border: 2px solid;
+        border-color: @vis-editor-agg-wide-btn-border;
         border-top: 0px;
         padding: 3px;
         border-bottom-right-radius: @border-radius-base;
         border-bottom-left-radius: @border-radius-base;
-        background-color: @body-bg;
+        background-color: @vis-editor-agg-wide-btn-bg;
         font-weight: bold;
       }
 
       &-add:hover {
-        background-color: @gray-lighter;
+        color: @vis-editor-agg-wide-btn-hover-color;
+        background-color: @vis-editor-agg-wide-btn-hover-bg;
       }
     }
 
@@ -310,8 +328,10 @@
     }
 
     &-order-agg {
-      border: 2px solid @gray-lighter;
+      border: 2px solid;
+      border-color: @vis-editor-agg-editor-order-border;
       border-radius: @border-radius-base;
+      background-color: @vis-editor-agg-editor-order-bg;
       margin: @vis-editor-agg-editor-spacing;
       padding: @vis-editor-agg-editor-spacing;
     }
@@ -326,6 +346,7 @@
     display: flex;
     flex-direction: column;
     overflow: auto;
+    padding-left: @collapser-width;
 
     &.embedded {
       flex-shrink: 1;
@@ -349,7 +370,6 @@
     }
 
     .visualize-chart {
-      flex: 1 1 100%;
       position: relative;
     }
   }

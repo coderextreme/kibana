@@ -1,21 +1,26 @@
-define(function (require) {
-  return function VisTypeFactory(Private) {
+import VislibVisualizationsColumnChartProvider from 'ui/vislib/visualizations/column_chart';
+import VislibVisualizationsPieChartProvider from 'ui/vislib/visualizations/pie_chart';
+import VislibVisualizationsCrossChartProvider from 'ui/vislib/visualizations/cross_chart';
+import VislibVisualizationsLineChartProvider from 'ui/vislib/visualizations/line_chart';
+import VislibVisualizationsAreaChartProvider from 'ui/vislib/visualizations/area_chart';
+import VislibVisualizationsTileMapProvider from 'ui/vislib/visualizations/tile_map';
 
-    /**
-     * Provides the visualizations for the vislib
-     *
-     * @module vislib
-     * @submodule VisTypeFactory
-     * @param Private {Object} Loads any function as an angular module
-     * @return {Function} Returns an Object of Visualization classes
-     */
-    return {
-      histogram: Private(require('ui/vislib/visualizations/column_chart')),
-      pie: Private(require('ui/vislib/visualizations/pie_chart')),
-      cross: Private(require('ui/vislib/visualizations/cross_chart')),
-      line: Private(require('ui/vislib/visualizations/line_chart')),
-      area: Private(require('ui/vislib/visualizations/area_chart')),
-      tile_map: Private(require('ui/vislib/visualizations/tile_map'))
-    };
+export default function VisTypeFactory(Private) {
+
+  /**
+   * Provides the visualizations for the vislib
+   *
+   * @module vislib
+   * @submodule VisTypeFactory
+   * @param Private {Object} Loads any function as an angular module
+   * @return {Function} Returns an Object of Visualization classes
+   */
+  return {
+    histogram: Private(VislibVisualizationsColumnChartProvider),
+    pie: Private(VislibVisualizationsPieChartProvider),
+    cross: Private(VislibVisualizationsCrossChartProvider),
+    line: Private(VislibVisualizationsLineChartProvider),
+    area: Private(VislibVisualizationsAreaChartProvider),
+    tile_map: Private(VislibVisualizationsTileMapProvider)
   };
-});
+};

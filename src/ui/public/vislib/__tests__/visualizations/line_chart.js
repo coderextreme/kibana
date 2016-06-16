@@ -1,19 +1,21 @@
-var d3 = require('d3');
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var _ = require('lodash');
-var $ = require('jquery');
+import d3 from 'd3';
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import _ from 'lodash';
 
 // Data
-var seriesPos = require('fixtures/vislib/mock_data/date_histogram/_series');
-var seriesPosNeg = require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg');
-var seriesNeg = require('fixtures/vislib/mock_data/date_histogram/_series_neg');
-var histogramColumns = require('fixtures/vislib/mock_data/histogram/_columns');
-var rangeRows = require('fixtures/vislib/mock_data/range/_rows');
-var termSeries = require('fixtures/vislib/mock_data/terms/_series');
+import seriesPos from 'fixtures/vislib/mock_data/date_histogram/_series';
+import seriesPosNeg from 'fixtures/vislib/mock_data/date_histogram/_series_pos_neg';
+import seriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg';
+import histogramColumns from 'fixtures/vislib/mock_data/histogram/_columns';
+import rangeRows from 'fixtures/vislib/mock_data/range/_rows';
+import termSeries from 'fixtures/vislib/mock_data/terms/_series';
+import $ from 'jquery';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
-var dataTypes = [
+let dataTypes = [
   ['series pos', seriesPos],
   ['series pos neg', seriesPosNeg],
   ['series neg', seriesNeg],
@@ -24,24 +26,26 @@ var dataTypes = [
 
 describe('Vislib Line Chart', function () {
   dataTypes.forEach(function (type, i) {
-    var name = type[0];
-    var data = type[1];
+    let name = type[0];
+    let data = type[1];
 
     describe(name + ' Data', function () {
-      var vis;
+      let vis;
+      let persistedState;
 
       beforeEach(ngMock.module('kibana'));
       beforeEach(ngMock.inject(function (Private) {
-        var visLibParams = {
+        let visLibParams = {
           type: 'line',
           addLegend: true,
           addTooltip: true,
           drawLinesBetweenPoints: true
         };
 
-        vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
+        vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+        persistedState = new (Private(PersistedStatePersistedStateProvider))();
         vis.on('brush', _.noop);
-        vis.render(data);
+        vis.render(data, persistedState);
       }));
 
       afterEach(function () {
@@ -50,12 +54,12 @@ describe('Vislib Line Chart', function () {
       });
 
       describe('addCircleEvents method', function () {
-        var circle;
-        var brush;
-        var d3selectedCircle;
-        var onBrush;
-        var onClick;
-        var onMouseOver;
+        let circle;
+        let brush;
+        let d3selectedCircle;
+        let onBrush;
+        let onClick;
+        let onMouseOver;
 
         beforeEach(ngMock.inject(function () {
           vis.handler.charts.forEach(function (chart) {
@@ -129,7 +133,7 @@ describe('Vislib Line Chart', function () {
 
         it('should return a yMin and yMax', function () {
           vis.handler.charts.forEach(function (chart) {
-            var yAxis = chart.handler.yAxis;
+            let yAxis = chart.handler.yAxis;
 
             expect(yAxis.domain[0]).to.not.be(undefined);
             expect(yAxis.domain[1]).to.not.be(undefined);
@@ -138,7 +142,7 @@ describe('Vislib Line Chart', function () {
 
         it('should render a zero axis line', function () {
           vis.handler.charts.forEach(function (chart) {
-            var yAxis = chart.handler.yAxis;
+            let yAxis = chart.handler.yAxis;
 
             if (yAxis.yMin < 0 && yAxis.yMax > 0) {
               expect($(chart.chartEl).find('line.zero-line').length).to.be(1);
@@ -165,13 +169,13 @@ describe('Vislib Line Chart', function () {
       describe('defaultYExtents is true', function () {
         beforeEach(function () {
           vis._attr.defaultYExtents = true;
-          vis.render(data);
+          vis.render(data, persistedState);
         });
 
         it('should return yAxis extents equal to data extents', function () {
           vis.handler.charts.forEach(function (chart) {
-            var yAxis = chart.handler.yAxis;
-            var yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
+            let yAxis = chart.handler.yAxis;
+            let yVals = [vis.handler.data.getYMin(), vis.handler.data.getYMax()];
 
             expect(yAxis.domain[0]).to.equal(yVals[0]);
             expect(yAxis.domain[1]).to.equal(yVals[1]);

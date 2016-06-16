@@ -29,6 +29,9 @@ paginate {
 
           a {
             text-decoration: none;
+            background-color: @kibanaGray6;
+            margin-left: 2px;
+            padding: 8px 11px;
           }
 
           a:hover {
@@ -38,7 +41,8 @@ paginate {
           &.active a {
             text-decoration: none !important;
             font-weight: bold;
-            color: @text-color;
+            color: @paginate-page-link-active-color;
+            cursor: default;
           }
         }
       }

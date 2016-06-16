@@ -5,7 +5,7 @@ A Kibana _dashboard_ displays a set of saved visualizations in groups that you c
 dashboard to share or reload at a later time.
 
 .Sample dashboard
-image:images/NYCTA-Dashboard.jpg[Example dashboard]
+image:images/tutorial-dashboard.png[Example dashboard]
 
 [float]
 [[dashboard-getting-started]]
@@ -19,9 +19,12 @@ You need at least one saved <<visualize, visualization>> to use a dashboard.
 
 The first time you click the *Dashboard* tab, Kibana displays an empty dashboard.
 
-image:images/NewDashboard.jpg[New Dashboard screen]
+image:images/NewDashboard.png[New Dashboard screen]
 
-Build your dashboard by adding visualizations.
+Build your dashboard by adding visualizations. By default, Kibana dashboards use a light color theme. To use a dark color 
+theme instead, click the *Options* button and check the *Use dark theme* box.
+
+NOTE: You can change the default theme in the *Advanced* section of the *Settings* tab.
 
 [float]
 [[dash-autorefresh]]
@@ -31,9 +34,9 @@ include::autorefresh.asciidoc[]
 [[adding-visualizations-to-a-dashboard]]
 ==== Adding Visualizations to a Dashboard
 
-To add a visualization to the dashboard, click the *Add Visualization* image:images/AddVis.png[Plus] button in the 
-toolbar panel. Select a saved visualization from the list. You can filter the list of visualizations by typing a filter 
-string into the *Visualization Filter* field.
+To add a visualization to the dashboard, click the *Add* button in the toolbar panel. Select a saved visualization 
+from the list. You can filter the list of visualizations by typing a filter string into the *Visualization Filter* 
+field.
 
 The visualization you select appears in a _container_ on your dashboard.
 
@@ -55,7 +58,7 @@ when you save a dashboard. To disable this behavior, clear the *Store time with 
 
 Click the *Load Saved Dashboard* button to display a list of existing dashboards. The saved dashboard selector includes 
 a text field to filter by dashboard name and a link to the Object Editor for managing your saved dashboards. You can 
-also access the Object Editor by clicking *Settings > Edit Saved Objects*.
+also access the Object Editor by clicking *Settings > Objects*.
 
 [float]
 [[sharing-dashboards]]
@@ -66,9 +69,11 @@ in your Web page.
 
 NOTE: A user must have Kibana access in order to view embedded dashboards.
 
-Click the *Share* button to display HTML code to embed the dashboard in another Web page, along with a direct link to 
-the dashboard. Click the copy button image:images/Clipboard.png[Copy to Clipboard button] next to either option to copy 
-the code or the link to your clipboard.
+To share a dashboard, click the *Share* button image:images/share-dashboard.png[] to display the _Sharing_ panel.
+
+Click the *Copy to Clipboard* button image:images/share-link.png[] to copy the native URL or embed HTML to the clipboard.
+Click the *Generate short URL* button image:images/share-short-link.png[] to create a shortened URL for sharing or 
+embedding.
 
 [float]
 [[embedding-dashboards]]
@@ -97,8 +102,6 @@ to make room for the moving container. Release the mouse button to confirm the c
 Move the cursor to the bottom right corner of the container until the cursor changes to point at the corner. After the 
 cursor changes, click and drag the corner of the container to change the container's size. Release the mouse button to 
 confirm the new container size.
-
-// enhancement request: a way to specify specific dimensions for a container in pixels, or at least display that info?
 
 [float]
 [[removing-containers]]
@@ -132,6 +135,10 @@ A summary of the statistics related to the request and the response, presented a
 grid includes the query duration, the request duration, the total number of records found on the server, and the 
 index pattern used to make the query.
 image:images/NYCTA-Statistics.jpg[]
+
+To export the raw data behind the visualization as a comma-separated-values (CSV) file, click on either the
+*Raw* or *Formatted* links at the bottom of any of the detailed information tabs. A raw export contains the data as it 
+is stored in Elasticsearch. A formatted export contains the results of any applicable Kibana [field formatters].
 
 [float]
 [[changing-the-visualization]]

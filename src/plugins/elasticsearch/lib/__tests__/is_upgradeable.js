@@ -1,14 +1,13 @@
-let _ = require('lodash');
-let expect = require('expect.js');
-let sinon = require('sinon');
+import _ from 'lodash';
+import expect from 'expect.js';
+import sinon from 'sinon';
 
-let isUpgradeable = require('../is_upgradeable');
-let utils = require('requirefrom')('src/utils');
-let pkg = utils('packageJson');
+import isUpgradeable from '../is_upgradeable';
+import pkg from '../../../../utils/package_json';
 let version = pkg.version;
 
 describe('plugins/elasticsearch', function () {
-  describe('lib/isUpgradeable', function () {
+  describe('lib/is_upgradeable', function () {
     let server = {
       config: _.constant({
         get: function (key) {
@@ -40,8 +39,9 @@ describe('plugins/elasticsearch', function () {
     upgradeDoc('4.0.0-rc2', '4.0.2', true);
     upgradeDoc('4.0.1', '4.1.0-rc', true);
     upgradeDoc('4.0.0-rc1', '4.0.0', true);
-    upgradeDoc('4.0.0-rc1-snapshot', '4.0.0', false);
-    upgradeDoc('4.1.0-rc1-snapshot', '4.1.0-rc1', false);
+    upgradeDoc('4.0.0-rc1-SNAPSHOT', '4.0.0', false);
+    upgradeDoc('4.1.0-rc1-SNAPSHOT', '4.1.0-rc1', false);
+    upgradeDoc('5.0.0-alpha1', '5.0.0', false);
 
     it('should handle missing _id field', function () {
       let doc = {

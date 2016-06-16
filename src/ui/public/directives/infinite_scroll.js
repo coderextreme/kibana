@@ -1,47 +1,46 @@
-define(function (require) {
-  var module = require('ui/modules').get('kibana');
-  var $ = require('jquery');
+import $ from 'jquery';
+import uiModules from 'ui/modules';
+let module = uiModules.get('kibana');
 
-  module.directive('kbnInfiniteScroll', function () {
-    return {
-      restrict: 'E',
-      scope: {
-        more: '='
-      },
-      link: function ($scope, $element, attrs) {
-        var $window = $(window);
-        var checkTimer;
+module.directive('kbnInfiniteScroll', function () {
+  return {
+    restrict: 'E',
+    scope: {
+      more: '='
+    },
+    link: function ($scope, $element, attrs) {
+      let $window = $(window);
+      let checkTimer;
 
-        function onScroll() {
-          if (!$scope.more) return;
+      function onScroll() {
+        if (!$scope.more) return;
 
-          var winHeight = $window.height();
-          var winBottom = winHeight + $window.scrollTop();
-          var elTop = $element.offset().top;
-          var remaining = elTop - winBottom;
+        let winHeight = $window.height();
+        let winBottom = winHeight + $window.scrollTop();
+        let elTop = $element.offset().top;
+        let remaining = elTop - winBottom;
 
-          if (remaining <= winHeight * 0.50) {
-            $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
-              var more = $scope.more();
-            });
-          }
+        if (remaining <= winHeight * 0.50) {
+          $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
+            let more = $scope.more();
+          });
         }
-
-        function scheduleCheck() {
-          if (checkTimer) return;
-          checkTimer = setTimeout(function () {
-            checkTimer = null;
-            onScroll();
-          }, 50);
-        }
-
-        $window.on('scroll', scheduleCheck);
-        $scope.$on('$destroy', function () {
-          clearTimeout(checkTimer);
-          $window.off('scroll', scheduleCheck);
-        });
-        scheduleCheck();
       }
-    };
-  });
+
+      function scheduleCheck() {
+        if (checkTimer) return;
+        checkTimer = setTimeout(function () {
+          checkTimer = null;
+          onScroll();
+        }, 50);
+      }
+
+      $window.on('scroll', scheduleCheck);
+      $scope.$on('$destroy', function () {
+        clearTimeout(checkTimer);
+        $window.off('scroll', scheduleCheck);
+      });
+      scheduleCheck();
+    }
+  };
 });

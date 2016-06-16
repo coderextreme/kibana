@@ -1,15 +1,19 @@
-define(function (require) {
-  var notify = require('ui/modules').get('kibana/notify');
-  var _ = require('lodash');
+import _ from 'lodash';
+import uiModules from 'ui/modules';
+import toasterTemplate from 'ui/notify/partials/toaster.html';
+import 'ui/notify/notify.less';
+import 'ui/filters/markdown';
+import 'ui/directives/truncated';
 
-  notify.directive('kbnNotifications', function () {
-    return {
-      restrict: 'E',
-      scope: {
-        list: '=list'
-      },
-      replace: true,
-      template: require('ui/notify/partials/toaster.html')
-    };
-  });
+let notify = uiModules.get('kibana/notify');
+
+notify.directive('kbnNotifications', function () {
+  return {
+    restrict: 'E',
+    scope: {
+      list: '=list'
+    },
+    replace: true,
+    template: toasterTemplate
+  };
 });

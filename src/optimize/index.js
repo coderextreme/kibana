@@ -1,3 +1,4 @@
+import FsOptimizer from './fs_optimizer';
 module.exports = async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
 
@@ -19,7 +20,9 @@ module.exports = async (kbnServer, server, config) => {
   await bundles.writeEntryFiles();
 
   // in prod, only bundle what looks invalid or missing
-  if (config.get('env.prod')) bundles = await kbnServer.bundles.getInvalidBundles();
+  if (config.get('optimize.useBundleCache')) {
+    bundles = await bundles.getInvalidBundles();
+  }
 
   // we might not have any work to do
   if (!bundles.getIds().length) {
@@ -31,11 +34,11 @@ module.exports = async (kbnServer, server, config) => {
   }
 
   // only require the FsOptimizer when we need to
-  let FsOptimizer = require('./FsOptimizer');
   let optimizer = new FsOptimizer({
     env: bundles.env,
     bundles: bundles,
     profile: config.get('optimize.profile'),
+    urlBasePath: config.get('server.basePath'),
     sourceMaps: config.get('optimize.sourceMaps'),
     unsafeCache: config.get('optimize.unsafeCache'),
   });

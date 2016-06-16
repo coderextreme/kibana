@@ -1,14 +1,15 @@
-var getSort = require('ui/doc_table/lib/get_sort');
-var defaultSort = {time: 'desc'};
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var indexPattern;
+import getSort from 'ui/doc_table/lib/get_sort';
+let defaultSort = {time: 'desc'};
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+let indexPattern;
 
 describe('docTable', function () {
   beforeEach(ngMock.module('kibana'));
 
   beforeEach(ngMock.inject(function (Private, _$rootScope_, Promise) {
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
   describe('getSort function', function () {

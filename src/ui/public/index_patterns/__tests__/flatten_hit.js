@@ -1,18 +1,19 @@
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import IndexPatternsFlattenHitProvider from 'ui/index_patterns/_flatten_hit';
 
 describe('IndexPattern#flattenHit()', function () {
 
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
 
-  var flattenHit;
-  var config;
-  var hit;
-  var flat;
+  let flattenHit;
+  let config;
+  let hit;
+  let flat;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    var indexPattern = {
+    let indexPattern = {
       fields: {
         byName: {
           'message': { type: 'string' },
@@ -32,7 +33,7 @@ describe('IndexPattern#flattenHit()', function () {
       }
     };
 
-    flattenHit = Private(require('ui/index_patterns/_flatten_hit'))(indexPattern).uncached;
+    flattenHit = Private(IndexPatternsFlattenHitProvider)(indexPattern).uncached;
     config = $injector.get('config');
 
     hit = {

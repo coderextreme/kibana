@@ -1,21 +1,24 @@
-var d3 = require('d3');
-var angular = require('angular');
-var $ = require('jquery');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import d3 from 'd3';
+import angular from 'angular';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
 
 // Data
-var series = require('fixtures/vislib/mock_data/date_histogram/_series');
-var columns = require('fixtures/vislib/mock_data/date_histogram/_columns');
-var rows = require('fixtures/vislib/mock_data/date_histogram/_rows');
-var stackedSeries = require('fixtures/vislib/mock_data/date_histogram/_stacked_series');
-var dateHistogramArray = [
+import series from 'fixtures/vislib/mock_data/date_histogram/_series';
+import columns from 'fixtures/vislib/mock_data/date_histogram/_columns';
+import rows from 'fixtures/vislib/mock_data/date_histogram/_rows';
+import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
+import $ from 'jquery';
+import VislibLibLayoutLayoutProvider from 'ui/vislib/lib/layout/layout';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+let dateHistogramArray = [
   series,
   columns,
   rows,
   stackedSeries
 ];
-var names = [
+let names = [
   'series',
   'columns',
   'rows',
@@ -24,18 +27,20 @@ var names = [
 
 dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Layout Class Test Suite for ' + names[i] + ' Data', function () {
-    var Layout;
-    var vis;
-    var numberOfCharts;
-    var testLayout;
+    let Layout;
+    let vis;
+    let persistedState;
+    let numberOfCharts;
+    let testLayout;
 
     beforeEach(ngMock.module('kibana'));
 
     beforeEach(function () {
       ngMock.inject(function (Private) {
-        Layout = Private(require('ui/vislib/lib/layout/layout'));
-        vis = Private(require('fixtures/vislib/_vis_fixture'))();
-        vis.render(data);
+        Layout = Private(VislibLibLayoutLayoutProvider);
+        vis = Private(FixturesVislibVisFixtureProvider)();
+        persistedState = new (Private(PersistedStatePersistedStateProvider))();
+        vis.render(data, persistedState);
         numberOfCharts = vis.handler.charts.length;
       });
     });
@@ -50,7 +55,6 @@ dateHistogramArray.forEach(function (data, i) {
         expect($(vis.el).find('.vis-wrapper').length).to.be(1);
         expect($(vis.el).find('.y-axis-col-wrapper').length).to.be(1);
         expect($(vis.el).find('.vis-col-wrapper').length).to.be(1);
-        expect($(vis.el).find('.legend-col-wrapper').length).to.be(1);
         expect($(vis.el).find('.y-axis-col').length).to.be(1);
         expect($(vis.el).find('.y-axis-title').length).to.be(1);
         expect($(vis.el).find('.y-axis-div-wrapper').length).to.be(1);

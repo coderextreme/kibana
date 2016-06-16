@@ -1,32 +1,26 @@
-var src = require('requirefrom')('src');
-var expect = require('expect.js');
-var util = require('util');
-var format = util.format;
+import expect from 'expect.js';
+import { format } from 'util';
 
-var KbnServer = src('server/KbnServer');
-var fromRoot = src('utils/fromRoot');
+import * as kbnTestServer from '../../../../../test/utils/kbn_server';
+import fromRoot from '../../../../utils/from_root';
 
 describe('plugins/elasticsearch', function () {
   describe('routes', function () {
-    before(require('./_ensure_elasticsearch'));
 
-    var kbnServer;
+    let kbnServer;
 
     before(function () {
-      kbnServer = new KbnServer({
-        server: { autoListen: false },
-        logging: { quiet: true },
+      this.timeout(60000); // sometimes waiting for server takes longer than 10
+
+      kbnServer = kbnTestServer.createServer({
         plugins: {
           scanDirs: [
             fromRoot('src/plugins')
           ]
-        },
-        optimize: {
-          enabled: false
         }
       });
-
-      return kbnServer.ready();
+      return kbnServer.ready()
+      .then(() => kbnServer.server.plugins.elasticsearch.waitUntilReady());
     });
 
 
@@ -40,10 +34,10 @@ describe('plugins/elasticsearch', function () {
         options.payload = JSON.stringify(options.payload);
       }
 
-      var statusCode = options.statusCode || 200;
+      const statusCode = options.statusCode || 200;
       describe(format('%s %s', options.method, options.url), function () {
         it('should should return ' + statusCode, function (done) {
-          kbnServer.server.inject(options, function (res) {
+          kbnTestServer.makeRequest(kbnServer, options, function (res) {
             try {
               expect(res.statusCode).to.be(statusCode);
               done();
@@ -69,8 +63,19 @@ describe('plugins/elasticsearch', function () {
     testRoute({
       method: 'POST',
       url: '/elasticsearch/.kibana',
-      payload: {settings: { number_of_shards: 1, number_of_replicas: 1 }},
-      statusCode: 200
+      statusCode: 405
+    });
+
+    testRoute({
+      method: 'PUT',
+      url: '/elasticsearch/.kibana',
+      statusCode: 405
+    });
+
+    testRoute({
+      method: 'DELETE',
+      url: '/elasticsearch/.kibana',
+      statusCode: 405
     });
 
     testRoute({
@@ -100,10 +105,8 @@ describe('plugins/elasticsearch', function () {
     testRoute({
       method: 'POST',
       url: '/elasticsearch/_msearch?timeout=0&ignore_unavailable=true&preference=1429577952339',
-      payload: '{"index":"logstash-2015.04.21","ignore_unavailable":true}\n{"size":500,"sort":{"@timestamp":"desc"},"query":{"filtered":{"query":{"query_string":{"analyze_wildcard":true,"query":"*"}},"filter":{"bool":{"must":[{"range":{"@timestamp":{"gte":1429577068175,"lte":1429577968175}}}],"must_not":[]}}}},"highlight":{"pre_tags":["@kibana-highlighted-field@"],"post_tags":["@/kibana-highlighted-field@"],"fields":{"*":{}}},"aggs":{"2":{"date_histogram":{"field":"@timestamp","interval":"30s","pre_zone":"-07:00","pre_zone_adjust_large_interval":true,"min_doc_count":0,"extended_bounds":{"min":1429577068175,"max":1429577968175}}}},"fields":["*","_source"],"script_fields":{},"fielddata_fields":["timestamp_offset","@timestamp","utc_time"]}\n' // eslint-disable-line max-len
+      payload: '{"index":"logstash-2015.04.21","ignore_unavailable":true}\n{"size":500,"sort":{"@timestamp":"desc"},"query":{"bool":{"must":[{"query_string":{"analyze_wildcard":true,"query":"*"}},{"bool":{"must":[{"range":{"@timestamp":{"gte":1429577068175,"lte":1429577968175}}}],"must_not":[]}}],"must_not":[]}},"highlight":{"pre_tags":["@kibana-highlighted-field@"],"post_tags":["@/kibana-highlighted-field@"],"fields":{"*":{}}},"aggs":{"2":{"date_histogram":{"field":"@timestamp","interval":"30s","min_doc_count":0,"extended_bounds":{"min":1429577068175,"max":1429577968175}}}},"fields":["*","_source"],"script_fields":{},"fielddata_fields":["timestamp_offset","@timestamp","utc_time"]}\n' // eslint-disable-line max-len
     });
 
   });
 });
-
-

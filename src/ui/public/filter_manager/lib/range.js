@@ -1,37 +1,53 @@
-define(function (require) {
-  var _ = require('lodash');
-  return function buildRangeFilter(field, params, indexPattern, formattedValue) {
-    var filter = { meta: { index: indexPattern.id } };
-    if (formattedValue) filter.meta.formattedValue = formattedValue;
+import _ from 'lodash';
+const OPERANDS_IN_RANGE = 2;
 
-    params = _.clone(params);
+export default function buildRangeFilter(field, params, indexPattern, formattedValue) {
+  const filter = { meta: { index: indexPattern.id } };
+  if (formattedValue) filter.meta.formattedValue = formattedValue;
 
-    if (params.gte && params.gt) throw new Error('gte and gt are mutually exclusive');
-    if (params.lte && params.lt) throw new Error('lte and lt are mutually exclusive');
+  params = _.clone(params);
 
-    if (field.scripted) {
-      var operators = {
-        gt: '>',
-        gte: '>=',
-        lte: '<=',
-        lt: '<',
-      };
+  if ('gte' in params && 'gt' in params) throw new Error('gte and gt are mutually exclusive');
+  if ('lte' in params && 'lt' in params) throw new Error('lte and lt are mutually exclusive');
 
-      var script = _.map(params, function (val, key) {
-        return '(' + field.script + ')' + operators[key] + key;
-      }).join(' && ');
+  const totalInfinite = ['gt', 'lt'].reduce((totalInfinite, op) => {
+    const key = op in params ? op : `${op}e`;
+    const isInfinite = Math.abs(params[key]) === Infinity;
 
-      var value = _.map(params, function (val, key) {
-        return operators[key] + field.format.convert(val);
-      }).join(' ');
-
-      filter.script = { script: script, params: params, lang: field.lang };
-      filter.script.params.value = value;
-      filter.meta.field = field.name;
-    } else {
-      filter.range = {};
-      filter.range[field.name] = params;
+    if (isInfinite) {
+      totalInfinite++;
+      delete params[key];
     }
-    return filter;
-  };
-});
+
+    return totalInfinite;
+  }, 0);
+
+  if (totalInfinite === OPERANDS_IN_RANGE) {
+    filter.match_all = {};
+    filter.meta.field = field.name;
+  } else if (field.scripted) {
+    const operators = {
+      gt: '>',
+      gte: '>=',
+      lte: '<=',
+      lt: '<',
+    };
+
+    const script = _.map(params, function (val, key) {
+      return '(' + field.script + ')' + operators[key] + key;
+    }).join(' && ');
+
+    const value = _.map(params, function (val, key) {
+      return operators[key] + field.format.convert(val);
+    }).join(' ');
+
+    filter.script = { script: script, params: params, lang: field.lang };
+    filter.script.params.value = value;
+    filter.meta.field = field.name;
+  } else {
+    filter.range = {};
+    filter.range[field.name] = params;
+  }
+
+  return filter;
+};

@@ -1,22 +1,24 @@
-var _ = require('lodash');
-var $ = require('jquery');
-var d3 = require('d3');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import _ from 'lodash';
+import d3 from 'd3';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
 
-var series = require('fixtures/vislib/mock_data/date_histogram/_series');
-var columns = require('fixtures/vislib/mock_data/date_histogram/_columns');
-var rows = require('fixtures/vislib/mock_data/date_histogram/_rows');
-var stackedSeries = require('fixtures/vislib/mock_data/date_histogram/_stacked_series');
+import series from 'fixtures/vislib/mock_data/date_histogram/_series';
+import columns from 'fixtures/vislib/mock_data/date_histogram/_columns';
+import rows from 'fixtures/vislib/mock_data/date_histogram/_rows';
+import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
+import $ from 'jquery';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
 
-var dataArray = [
+let dataArray = [
   series,
   columns,
   rows,
   stackedSeries
 ];
 
-var names = [
+let names = [
   'series',
   'columns',
   'rows',
@@ -26,16 +28,18 @@ var names = [
 
 dataArray.forEach(function (data, i) {
   describe('Vislib Vis Test Suite for ' + names[i] + ' Data', function () {
-    var beforeEvent = 'click';
-    var afterEvent = 'brush';
-    var vis;
-    var secondVis;
-    var numberOfCharts;
+    let beforeEvent = 'click';
+    let afterEvent = 'brush';
+    let vis;
+    let persistedState;
+    let secondVis;
+    let numberOfCharts;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      vis = Private(require('fixtures/vislib/_vis_fixture'))();
-      secondVis = Private(require('fixtures/vislib/_vis_fixture'))();
+      vis = Private(FixturesVislibVisFixtureProvider)();
+      persistedState = new (Private(PersistedStatePersistedStateProvider))();
+      secondVis = Private(FixturesVislibVisFixtureProvider)();
     }));
 
     afterEach(function () {
@@ -46,7 +50,7 @@ dataArray.forEach(function (data, i) {
 
     describe('render Method', function () {
       beforeEach(function () {
-        vis.render(data);
+        vis.render(data, persistedState);
         numberOfCharts = vis.handler.charts.length;
       });
 
@@ -66,7 +70,7 @@ dataArray.forEach(function (data, i) {
 
     describe('resize Method', function () {
       beforeEach(function () {
-        vis.render(data);
+        vis.render(data, persistedState);
         vis.resize();
         numberOfCharts = vis.handler.charts.length;
       });
@@ -85,8 +89,8 @@ dataArray.forEach(function (data, i) {
 
     describe('destroy Method', function () {
       beforeEach(function () {
-        vis.render(data);
-        secondVis.render(data);
+        vis.render(data, persistedState);
+        secondVis.render(data, persistedState);
         secondVis.destroy();
       });
 
@@ -101,7 +105,7 @@ dataArray.forEach(function (data, i) {
 
     describe('set Method', function () {
       beforeEach(function () {
-        vis.render(data);
+        vis.render(data, persistedState);
         vis.set('addLegend', false);
         vis.set('offset', 'wiggle');
       });
@@ -114,7 +118,7 @@ dataArray.forEach(function (data, i) {
 
     describe('get Method', function () {
       beforeEach(function () {
-        vis.render(data);
+        vis.render(data, persistedState);
       });
 
       it('should get attribue values', function () {
@@ -125,13 +129,13 @@ dataArray.forEach(function (data, i) {
     });
 
     describe('on Method', function () {
-      var events = [
+      let events = [
         beforeEvent,
         afterEvent
       ];
-      var listeners;
-      var listener1;
-      var listener2;
+      let listeners;
+      let listener1;
+      let listener2;
 
       beforeEach(function () {
         listeners = [
@@ -145,7 +149,7 @@ dataArray.forEach(function (data, i) {
         });
 
         // Render chart
-        vis.render(data);
+        vis.render(data, persistedState);
 
         // Add event after charts have rendered
         listeners.forEach(function (listener) {
@@ -169,7 +173,7 @@ dataArray.forEach(function (data, i) {
       });
 
       it('should cause a listener for each event to be attached to each chart', function () {
-        var charts = vis.handler.charts;
+        let charts = vis.handler.charts;
 
         charts.forEach(function (chart, i) {
           expect(chart.events.listenerCount(beforeEvent)).to.be.above(0);
@@ -179,9 +183,9 @@ dataArray.forEach(function (data, i) {
     });
 
     describe('off Method', function () {
-      var listeners;
-      var listener1;
-      var listener2;
+      let listeners;
+      let listener1;
+      let listener2;
 
       beforeEach(function () {
         listeners = [];
@@ -199,7 +203,7 @@ dataArray.forEach(function (data, i) {
         vis.off(beforeEvent, listener1);
 
         // Render chart
-        vis.render(data);
+        vis.render(data, persistedState);
 
         // Add event after charts have rendered
         listeners.forEach(function (listener) {
@@ -216,7 +220,7 @@ dataArray.forEach(function (data, i) {
       });
 
       it('should remove a listener', function () {
-        var charts = vis.handler.charts;
+        let charts = vis.handler.charts;
 
         expect(vis.listeners(beforeEvent)).to.not.contain(listener1);
         expect(vis.listeners(beforeEvent)).to.contain(listener2);
@@ -232,7 +236,7 @@ dataArray.forEach(function (data, i) {
       });
 
       it('should remove the event and all listeners when only event passed an argument', function () {
-        var charts = vis.handler.charts;
+        let charts = vis.handler.charts;
         vis.off(afterEvent);
 
         // should remove 'brush' event
@@ -247,7 +251,7 @@ dataArray.forEach(function (data, i) {
       });
 
       it('should remove the event from the chart when the last listener is removed', function () {
-        var charts = vis.handler.charts;
+        let charts = vis.handler.charts;
         vis.off(afterEvent, listener2);
 
         expect(vis.listenerCount(afterEvent)).to.be(0);

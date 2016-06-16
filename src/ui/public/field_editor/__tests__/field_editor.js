@@ -1,23 +1,26 @@
+import $ from 'jquery';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import IndexPatternsFieldProvider from 'ui/index_patterns/_field';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 describe('FieldEditor directive', function () {
-  var $ = require('jquery');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
 
-  var Field;
-  var StringFormat;
-  var $rootScope;
+  let Field;
+  let StringFormat;
+  let $rootScope;
 
-  var compile;
-  var $scope;
-  var $el;
+  let compile;
+  let $scope;
+  let $el;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($compile, $injector, Private) {
     $rootScope = $injector.get('$rootScope');
-    Field = Private(require('ui/index_patterns/_field'));
-    StringFormat = Private(require('ui/registry/field_formats')).getType('string');
+    Field = Private(IndexPatternsFieldProvider);
+    StringFormat = Private(RegistryFieldFormatsProvider).getType('string');
 
-    $rootScope.indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    $rootScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     // set the field format for this field
     $rootScope.indexPattern.fieldFormatMap.time = new StringFormat({ foo: 1, bar: 2 });
     $rootScope.indexPattern._indexFields();
@@ -38,13 +41,13 @@ describe('FieldEditor directive', function () {
 
     it('exposes $scope.editor, a controller for the editor', function () {
       compile();
-      var editor = $scope.editor;
+      let editor = $scope.editor;
       expect(editor).to.be.an('object');
     });
   });
 
   describe('$scope.editor', function () {
-    var editor;
+    let editor;
 
     beforeEach(function () {
       compile();
@@ -60,8 +63,8 @@ describe('FieldEditor directive', function () {
     });
 
     describe('editor.field', function () {
-      var field;
-      var actual;
+      let field;
+      let actual;
 
       beforeEach(function () {
         field = editor.field;
@@ -78,8 +81,8 @@ describe('FieldEditor directive', function () {
       });
 
       it('reflects changes to the index patterns field', function () {
-        var a = {};
-        var b = {};
+        let a = {};
+        let b = {};
 
         actual.script = a;
         expect(field.script).to.be(a);
@@ -89,7 +92,7 @@ describe('FieldEditor directive', function () {
       });
 
       it('is fully mutable, unlike the index patterns field', function () {
-        var origName = actual.name;
+        let origName = actual.name;
         actual.name = 'john';
         expect(actual.name).to.not.be('john');
         expect(actual.name).to.be(origName);

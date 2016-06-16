@@ -1,10 +1,19 @@
-var modules = require('ui/modules');
-var $ = require('jquery');
-var _ = require('lodash');
+import _ from 'lodash';
+import { format as formatUrl, parse as parseUrl } from 'url';
+
+import modules from 'ui/modules';
+import Notifier from 'ui/notify/notifier';
+import { UrlOverflowServiceProvider } from '../../error_url_overflow';
+
+const URL_LIMIT_WARN_WITHIN = 150;
 
 module.exports = function (chrome, internals) {
+
+  chrome.getFirstPathSegment = _.noop;
+  chrome.getBreadcrumbs = _.noop;
+
   chrome.setupAngular = function () {
-    var kibana = modules.get('kibana');
+    let kibana = modules.get('kibana');
 
     _.forOwn(chrome.getInjected(), function (val, name) {
       kibana.value(name, val);
@@ -14,49 +23,58 @@ module.exports = function (chrome, internals) {
     .value('kbnVersion', internals.version)
     .value('buildNum', internals.buildNum)
     .value('buildSha', internals.buildSha)
+    .value('serverName', internals.serverName)
+    .value('uiSettings', internals.uiSettings)
     .value('sessionId', Date.now())
+    .value('chrome', chrome)
     .value('esUrl', (function () {
-      var a = document.createElement('a');
-      a.href = '/elasticsearch';
+      let a = document.createElement('a');
+      a.href = chrome.addBasePath('/elasticsearch');
       return a.href;
     }()))
-    .directive('kbnChrome', function ($rootScope) {
-      return {
-        template: function ($el) {
-          var $content = $(require('ui/chrome/chrome.html'));
-          var $app = $content.find('.application');
+    .config(chrome.$setupXsrfRequestInterceptor)
+    .run(($location, $rootScope, Private) => {
+      chrome.getFirstPathSegment = () => {
+        return $location.path().split('/')[1];
+      };
 
-          if (internals.rootController) {
-            $app.attr('ng-controller', internals.rootController);
+      chrome.getBreadcrumbs = () => {
+        let path = $location.path();
+        let length = path.length - 1;
+
+        // trim trailing slash
+        if (path.charAt(length) === '/') {
+          length--;
+        }
+
+        return path.substr(1, length).split('/');
+      };
+
+      const notify = new Notifier();
+      const urlOverflow = Private(UrlOverflowServiceProvider);
+      const check = (event) => {
+        if ($location.path() === '/error/url-overflow') return;
+
+        try {
+          if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
+            notify.warning(`
+              The URL has gotten big and may cause Kibana
+              to stop working. Please simplify the data on screen.
+            `);
           }
-
-          if (internals.rootTemplate) {
-            $app.removeAttr('ng-view');
-            $app.html(internals.rootTemplate);
-          }
-
-          return $content;
-        },
-        controllerAs: 'chrome',
-        controller: function ($scope, $rootScope, $location, $http) {
-
-          // are we showing the embedded version of the chrome?
-          chrome.setVisible(!Boolean($location.search().embed));
-
-          // listen for route changes, propogate to tabs
-          var onRouteChange = _.bindKey(internals.tabs, 'consumeRouteUpdate', $location, chrome.getVisible());
-          $rootScope.$on('$routeChangeSuccess', onRouteChange);
-          $rootScope.$on('$routeUpdate', onRouteChange);
-          onRouteChange();
-
-          // and some local values
-          $scope.httpActive = $http.pendingRequests;
-          $scope.notifList = require('ui/notify')._notifs;
-
-          return chrome;
+        } catch (e) {
+          const { host, path, search, protocol } = parseUrl(window.location.href);
+          // rewrite the entire url to force the browser to reload and
+          // discard any potentially unstable state from before
+          window.location.href = formatUrl({ host, path, search, protocol, hash: '#/error/url-overflow' });
         }
       };
+
+      $rootScope.$on('$routeUpdate', check);
+      $rootScope.$on('$routeChangeStart', check);
     });
+
+    require('../directives')(chrome, internals);
 
     modules.link(kibana);
   };

@@ -1,29 +1,29 @@
-require('babel/polyfill');
 
-var _ = require('lodash');
-var $ = require('jquery');
-var angular = require('angular');
+import _ from 'lodash';
+import angular from 'angular';
 
-require('ui/timefilter');
-require('ui/private');
-require('ui/promises');
 
-var TabCollection = require('ui/chrome/TabCollection');
+import metadata from 'ui/metadata';
+import 'babel/polyfill';
+import $ from 'jquery';
+import 'ui/timefilter';
+import 'ui/private';
+import 'ui/promises';
+import 'ui/directives/kbn_src';
+import 'ui/watch_multi';
 
-var chrome = {
-  navBackground: '#222222',
-  logo: null,
-  smallLogo: null
-};
-
-var internals = _.assign(
-  _.cloneDeep(window.__KBN__ || {}),
+let chrome = {};
+let internals = _.defaults(
+  _.cloneDeep(metadata),
   {
-    tabs: new TabCollection(),
+    basePath: '',
     rootController: null,
     rootTemplate: null,
     showAppsLink: null,
-    brand: null
+    xsrfToken: null,
+    brand: null,
+    nav: [],
+    applicationClasses: []
   }
 );
 
@@ -33,6 +33,8 @@ $('<link>').attr({
 }).appendTo('head');
 
 require('./api/apps')(chrome, internals);
+require('./api/xsrf')(chrome, internals);
+require('./api/nav')(chrome, internals);
 require('./api/angular')(chrome, internals);
 require('./api/controls')(chrome, internals);
 require('./api/tabs')(chrome, internals);

@@ -1,41 +1,40 @@
-define(function (require) {
-  var module = require('ui/modules').get('kibana');
-  var $ = require('jquery');
+import $ from 'jquery';
+import truncText from 'trunc-text';
+import truncHTML from 'trunc-html';
+import uiModules from 'ui/modules';
+import truncatedTemplate from 'ui/directives/partials/truncated.html';
+import 'ui/filters/trust_as_html';
+const module = uiModules.get('kibana');
 
-  module.directive('kbnTruncated', function ($compile) {
-    return {
-      restrict: 'E',
-      scope: {
-        orig: '@',
-        length: '@'
-      },
-      template: function ($element, attrs) {
-        var template = '<span>{{text}}</span>';
-        template += '<span ng-if="orig.length > length"> <a ng-click="toggle()">{{action}}</a></span>';
-        return template;
-      },
-      link: function ($scope, $element, attrs) {
+module.directive('kbnTruncated', function ($compile) {
+  return {
+    restrict: 'E',
+    scope: {
+      source: '@',
+      length: '@',
+      isHtml: '@'
+    },
+    template: truncatedTemplate,
+    link: function ($scope, $element, attrs) {
+      const source = $scope.source;
+      const max = $scope.length;
+      const truncated = $scope.isHtml
+        ? truncHTML(source, max).html
+        : truncText(source, max);
 
-        var fullText = $scope.orig;
-        var truncated = fullText.substring(0, $scope.length);
+      $scope.content = truncated;
 
-        if (fullText === truncated) {
-          $scope.text = fullText;
-          return;
-        }
-
-        truncated += '...';
-
-        $scope.expanded = false;
-        $scope.text = truncated;
-        $scope.action = 'more';
-
-        $scope.toggle = function () {
-          $scope.expanded = !$scope.expanded;
-          $scope.text = $scope.expanded ? fullText : truncated;
-          $scope.action = $scope.expanded ? 'less' : 'more';
-        };
+      if (source === truncated) {
+        return;
       }
-    };
-  });
+      $scope.truncated = true;
+      $scope.expanded = false;
+      $scope.action = 'more';
+      $scope.toggle = () => {
+        $scope.expanded = !$scope.expanded;
+        $scope.content = $scope.expanded ? source : truncated;
+        $scope.action = $scope.expanded ? 'less' : 'more';
+      };
+    }
+  };
 });

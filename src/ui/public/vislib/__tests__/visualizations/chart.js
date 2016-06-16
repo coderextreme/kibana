@@ -1,19 +1,25 @@
-var d3 = require('d3');
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import d3 from 'd3';
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import VislibVisProvider from 'ui/vislib/vis';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import VislibVisualizationsColumnChartProvider from 'ui/vislib/visualizations/column_chart';
+import VislibVisualizationsChartProvider from 'ui/vislib/visualizations/_chart';
 
 describe('Vislib _chart Test Suite', function () {
-  var ColumnChart;
-  var Chart;
-  var Data;
-  var Vis;
-  var chartData = {};
-  var vis;
-  var el;
-  var myChart;
-  var config;
-  var data = {
+  let ColumnChart;
+  let Chart;
+  let Data;
+  let persistedState;
+  let Vis;
+  let chartData = {};
+  let vis;
+  let el;
+  let myChart;
+  let config;
+  let data = {
     hits      : 621,
     label     : '',
     ordered   : {
@@ -80,10 +86,11 @@ describe('Vislib _chart Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(require('ui/vislib/vis'));
-    Data = Private(require('ui/vislib/lib/data'));
-    ColumnChart = Private(require('ui/vislib/visualizations/column_chart'));
-    Chart = Private(require('ui/vislib/visualizations/_chart'));
+    Vis = Private(VislibVisProvider);
+    Data = Private(VislibLibDataProvider);
+    persistedState = new (Private(PersistedStatePersistedStateProvider))();
+    ColumnChart = Private(VislibVisualizationsColumnChartProvider);
+    Chart = Private(VislibVisualizationsChartProvider);
 
     el = d3.select('body').append('div').attr('class', 'column-chart');
 
@@ -96,7 +103,7 @@ describe('Vislib _chart Test Suite', function () {
     };
 
     vis = new Vis(el[0][0], config);
-    vis.data = new Data(data, config);
+    vis.data = new Data(data, config, persistedState);
 
     myChart = new ColumnChart(vis, el, chartData);
   }));

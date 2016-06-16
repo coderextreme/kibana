@@ -1,18 +1,22 @@
-var d3 = require('d3');
-var angular = require('angular');
-var _ = require('lodash');
-var $ = require('jquery');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import d3 from 'd3';
+import angular from 'angular';
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import $ from 'jquery';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import VislibLibXAxisProvider from 'ui/vislib/lib/x_axis';
 
 describe('Vislib xAxis Class Test Suite', function () {
-  var XAxis;
-  var Data;
-  var xAxis;
-  var el;
-  var fixture;
-  var dataObj;
-  var data = {
+  let XAxis;
+  let Data;
+  let persistedState;
+  let xAxis;
+  let el;
+  let fixture;
+  let dataObj;
+  let data = {
     hits: 621,
     label: '',
     ordered: {
@@ -76,8 +80,9 @@ describe('Vislib xAxis Class Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    Data = Private(require('ui/vislib/lib/data'));
-    XAxis = Private(require('ui/vislib/lib/x_axis'));
+    Data = Private(VislibLibDataProvider);
+    persistedState = new (Private(PersistedStatePersistedStateProvider))();
+    XAxis = Private(VislibLibXAxisProvider);
 
     el = d3.select('body').append('div')
       .attr('class', 'x-axis-wrapper')
@@ -86,7 +91,7 @@ describe('Vislib xAxis Class Test Suite', function () {
     fixture = el.append('div')
       .attr('class', 'x-axis-div');
 
-    dataObj = new Data(data, {});
+    dataObj = new Data(data, {}, persistedState);
     xAxis = new XAxis({
       el: $('.x-axis-div')[0],
       xValues: dataObj.xValues(),
@@ -122,13 +127,13 @@ describe('Vislib xAxis Class Test Suite', function () {
   });
 
   describe('getScale, getDomain, getTimeDomain, getOrdinalDomain, and getRange Methods', function () {
-    var ordered;
-    var timeScale;
-    var timeDomain;
-    var ordinalScale;
-    var ordinalDomain;
-    var width;
-    var range;
+    let ordered;
+    let timeScale;
+    let timeDomain;
+    let ordinalScale;
+    let ordinalDomain;
+    let width;
+    let range;
 
     beforeEach(function () {
       timeScale = xAxis.getScale();
@@ -171,8 +176,8 @@ describe('Vislib xAxis Class Test Suite', function () {
   });
 
   describe('getXScale Method', function () {
-    var width;
-    var xScale;
+    let width;
+    let xScale;
 
     beforeEach(function () {
       width = $('.x-axis-div').width();
@@ -195,8 +200,8 @@ describe('Vislib xAxis Class Test Suite', function () {
   });
 
   describe('getXAxis Method', function () {
-    var width;
-    var axis;
+    let width;
+    let axis;
 
     beforeEach(function () {
       width = $('.x-axis-div').width();
