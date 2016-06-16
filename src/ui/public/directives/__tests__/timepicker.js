@@ -1,26 +1,26 @@
-var angular = require('angular');
-var moment = require('moment');
-var expect = require('expect.js');
-var _ = require('lodash');
-var $ = require('jquery');
-var sinon = require('auto-release-sinon');
-var ngMock = require('ngMock');
+import angular from 'angular';
+import moment from 'moment';
+import expect from 'expect.js';
+import _ from 'lodash';
+import sinon from 'auto-release-sinon';
+import ngMock from 'ng_mock';
+import $ from 'jquery';
+import 'plugins/kibana/visualize/index';
+import 'plugins/kibana/dashboard/index';
+import 'plugins/kibana/discover/index';
 
-require('plugins/kibana/visualize/index');
-require('plugins/kibana/dashboard/index');
 
 // TODO: This should not be needed, timefilter is only included here, it should move
-require('plugins/kibana/discover/index');
 
-var $parentScope;
+let $parentScope;
 
-var $scope;
+let $scope;
 
-var $elem;
-var anchor = '2014-01-01T06:06:06.666Z';
-var clock;
+let $elem;
+let anchor = '2014-01-01T06:06:06.666Z';
+let clock;
 
-var init = function () {
+let init = function () {
   // Load the application
   ngMock.module('kibana');
 
@@ -34,7 +34,7 @@ var init = function () {
     $parentScope = $rootScope;
 
     // Add some parameters to it
-    var timefilter = {
+    let timefilter = {
       time : {
         from: moment().subtract(15, 'minutes'),
         to: moment(),
@@ -85,7 +85,7 @@ describe('timepicker directive', function () {
   });
 
   describe('refresh interval', function () {
-    var $courier;
+    let $courier;
     beforeEach(function () {
       init();
       ngMock.inject(function (courier, $rootScope) {
@@ -100,8 +100,8 @@ describe('timepicker directive', function () {
     });
 
     it('should have a $scope.setRefreshInterval() that sets interval variable', function (done) {
-      $scope.setRefreshInterval('interval');
-      expect($scope.interval).to.be('interval');
+      $scope.setRefreshInterval({ value : 10000  });
+      expect($scope.interval).to.have.property('value', 10000);
       done();
     });
 
@@ -152,7 +152,7 @@ describe('timepicker directive', function () {
 
     it('should default the interval on the courier with incorrect values', function (done) {
       // Change refresh interval and digest
-      $scope.setRefreshInterval('undefined');
+      $scope.setRefreshInterval();
       $elem.scope().$digest();
       expect($courier.searchLooper.loopInterval()).to.be(0);
       done();
@@ -174,7 +174,7 @@ describe('timepicker directive', function () {
       expect($elem.find('.kbn-timepicker-modes .active').text().trim()).to.be('quick');
 
       // Each of the 3 modes
-      var modes = ['absolute', 'relative', 'quick'];
+      let modes = ['absolute', 'relative', 'quick'];
       _.each(modes, function (mode) {
         $scope.setMode(mode);
         $scope.$digest();
@@ -215,7 +215,7 @@ describe('timepicker directive', function () {
     });
 
     it('has a preview of the "from" input', function (done) {
-      var preview = $elem.find('.kbn-timepicker-section span[ng-show="relative.preview"]');
+      let preview = $elem.find('.kbn-timepicker-section span[ng-show="relative.preview"]');
       expect(preview.text()).to.be(moment().subtract(15, 'minutes').format($scope.format));
       done();
     });
@@ -226,18 +226,18 @@ describe('timepicker directive', function () {
     });
 
     it('has a submit handler', function (done) {
-      var form = $elem.find('form[ng-submit="applyRelative()"]');
+      let form = $elem.find('form[ng-submit="applyRelative()"]');
       expect(form.length).to.be(1);
       done();
     });
 
     it('disables the submit button if the form is invalid', function (done) {
-      var button;
+      let button;
       button = $elem.find('button[disabled]');
       expect(button.length).to.be(0);
 
       // Make the form invalid
-      $scope.relative.count = 'foo';
+      $scope.relative.count = -3;
       $scope.formatRelative();
       $scope.$digest();
 
@@ -247,7 +247,7 @@ describe('timepicker directive', function () {
     });
 
     it('has a dropdown bound to relative.unit that contains all of the intervals', function (done) {
-      var select = $elem.find('.kbn-timepicker-section select[ng-model="relative.unit"]');
+      let select = $elem.find('.kbn-timepicker-section select[ng-model="relative.unit"]');
       expect(select.length).to.be(1);
       expect(select.find('option').length).to.be(7);
 
@@ -259,16 +259,16 @@ describe('timepicker directive', function () {
     });
 
     it('has a checkbox that is checked when rounding is enabled', function (done) {
-      var checkbox = $elem.find('.kbn-timepicker-section input[ng-model="relative.round"]');
+      let checkbox = $elem.find('.kbn-timepicker-section input[ng-model="relative.round"]');
       expect(checkbox.length).to.be(1);
 
       // Rounding is disabled by default
-      expect(checkbox.attr('checked')).to.be(undefined);
+      expect(checkbox.prop('checked')).to.be(false);
 
       // Enable rounding
       $scope.relative.round = true;
       $scope.$digest();
-      expect(checkbox.attr('checked')).to.be('checked');
+      expect(checkbox.prop('checked')).to.be(true);
 
       done();
     });
@@ -335,8 +335,8 @@ describe('timepicker directive', function () {
     });
 
     it('updates the input fields when the scope variables are changed', function (done) {
-      var input = $elem.find('.kbn-timepicker-section input[ng-model="relative.count"]');
-      var select = $elem.find('.kbn-timepicker-section select[ng-model="relative.unit"]');
+      let input = $elem.find('.kbn-timepicker-section input[ng-model="relative.count"]');
+      let select = $elem.find('.kbn-timepicker-section select[ng-model="relative.unit"]');
 
       $scope.relative.count = 5;
       $scope.$digest();
@@ -344,13 +344,11 @@ describe('timepicker directive', function () {
 
 
       // Should update the selected option
-      var i = 0;
       _.each($scope.units, function (longUnit, shortUnit) {
         $scope.relative.unit = shortUnit;
         $scope.$digest();
 
-        expect(select.val()).to.be(i.toString());
-        i++;
+        expect(select.val().split(':')[1]).to.be(shortUnit);
       });
 
       done();
@@ -361,7 +359,7 @@ describe('timepicker directive', function () {
 
   describe('absolute mode', function () {
 
-    var inputs;
+    let inputs;
 
     beforeEach(function () {
       init();
@@ -371,8 +369,8 @@ describe('timepicker directive', function () {
       inputs = {
         fromInput: $elem.find('.kbn-timepicker-section input[ng-model="absolute.from"]'),
         toInput: $elem.find('.kbn-timepicker-section input[ng-model="absolute.to"]'),
-        fromCalendar: $elem.find('.kbn-timepicker-section table[ng-model="absolute.from"] '),
-        toCalendar: $elem.find('.kbn-timepicker-section table[ng-model="absolute.to"] '),
+        fromCalendar: $elem.find('.kbn-timepicker-section div[ng-model="absolute.from"] '),
+        toCalendar: $elem.find('.kbn-timepicker-section div[ng-model="absolute.to"] '),
       };
 
     });

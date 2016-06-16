@@ -1,44 +1,49 @@
-var d3 = require('d3');
-var angular = require('angular');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
-var _ = require('lodash');
-var $ = require('jquery');
-var fixtures = require('fixtures/fake_hierarchical_data');
+import d3 from 'd3';
+import angular from 'angular';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import _ from 'lodash';
+import fixtures from 'fixtures/fake_hierarchical_data';
+import $ from 'jquery';
+import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import VisProvider from 'ui/vis';
+import PersistedStatePersistedStateProvider from 'ui/persisted_state/persisted_state';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import AggResponseHierarchicalBuildHierarchicalDataProvider from 'ui/agg_response/hierarchical/build_hierarchical_data';
 
-var rowAgg = [
+let rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
   { type: 'terms', schema: 'split', params: { field: 'extension', rows: true }},
   { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
   { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
 ];
 
-var colAgg = [
+let colAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
   { type: 'terms', schema: 'split', params: { field: 'extension', row: false }},
   { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
   { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
 ];
 
-var sliceAgg = [
+let sliceAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
   { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
   { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
 ];
 
-var aggArray = [
+let aggArray = [
   rowAgg,
   colAgg,
   sliceAgg
 ];
 
-var names = [
+let names = [
   'rows',
   'columns',
   'slices'
 ];
 
-var sizes = [
+let sizes = [
   0,
   5,
   15,
@@ -48,41 +53,43 @@ var sizes = [
 ];
 
 describe('No global chart settings', function () {
-  var visLibParams1 = {
+  let visLibParams1 = {
     el: '<div class=chart1></div>',
     type: 'pie',
     addLegend: true,
     addTooltip: true
   };
-  var visLibParams2 = {
+  let visLibParams2 = {
     el: '<div class=chart2></div>',
     type: 'pie',
     addLegend: true,
     addTooltip: true
   };
-  var chart1;
-  var chart2;
-  var Vis;
-  var indexPattern;
-  var buildHierarchicalData;
-  var data1;
-  var data2;
+  let chart1;
+  let chart2;
+  let Vis;
+  let persistedState;
+  let indexPattern;
+  let buildHierarchicalData;
+  let data1;
+  let data2;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    chart1 = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams1);
-    chart2 = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams2);
-    Vis = Private(require('ui/Vis'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-    buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
+    chart1 = Private(FixturesVislibVisFixtureProvider)(visLibParams1);
+    chart2 = Private(FixturesVislibVisFixtureProvider)(visLibParams2);
+    Vis = Private(VisProvider);
+    persistedState = new (Private(PersistedStatePersistedStateProvider))();
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
 
-    var id1 = 1;
-    var id2 = 1;
-    var stubVis1 = new Vis(indexPattern, {
+    let id1 = 1;
+    let id2 = 1;
+    let stubVis1 = new Vis(indexPattern, {
       type: 'pie',
       aggs: rowAgg
     });
-    var stubVis2 = new Vis(indexPattern, {
+    let stubVis2 = new Vis(indexPattern, {
       type: 'pie',
       aggs: colAgg
     });
@@ -98,8 +105,8 @@ describe('No global chart settings', function () {
     data1 = buildHierarchicalData(stubVis1, fixtures.threeTermBuckets);
     data2 = buildHierarchicalData(stubVis2, fixtures.threeTermBuckets);
 
-    chart1.render(data1);
-    chart2.render(data2);
+    chart1.render(data1, persistedState);
+    chart2.render(data2, persistedState);
   }));
 
   afterEach(function () {
@@ -113,19 +120,19 @@ describe('No global chart settings', function () {
   });
 
   describe('_validatePieData method', function () {
-    var allZeros = [
+    let allZeros = [
       { slices: { children: [] } },
       { slices: { children: [] } },
       { slices: { children: [] } }
     ];
 
-    var someZeros = [
+    let someZeros = [
       { slices: { children: [{}] } },
       { slices: { children: [{}] } },
       { slices: { children: [] } }
     ];
 
-    var noZeros = [
+    let noZeros = [
       { slices: { children: [{}] } },
       { slices: { children: [{}] } },
       { slices: { children: [{}] } }
@@ -150,26 +157,28 @@ describe('No global chart settings', function () {
 
 aggArray.forEach(function (dataAgg, i) {
   describe('Vislib PieChart Class Test Suite for ' + names[i] + ' data', function () {
-    var visLibParams = {
+    let visLibParams = {
       type: 'pie',
       addLegend: true,
       addTooltip: true
     };
-    var vis;
-    var Vis;
-    var indexPattern;
-    var buildHierarchicalData;
-    var data;
+    let vis;
+    let Vis;
+    let persistedState;
+    let indexPattern;
+    let buildHierarchicalData;
+    let data;
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      vis = Private(require('fixtures/vislib/_vis_fixture'))(visLibParams);
-      Vis = Private(require('ui/Vis'));
-      indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      buildHierarchicalData = Private(require('ui/agg_response/hierarchical/build_hierarchical_data'));
+      vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+      Vis = Private(VisProvider);
+      persistedState = new (Private(PersistedStatePersistedStateProvider))();
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      buildHierarchicalData = Private(AggResponseHierarchicalBuildHierarchicalDataProvider);
 
-      var id = 1;
-      var stubVis = new Vis(indexPattern, {
+      let id = 1;
+      let stubVis = new Vis(indexPattern, {
         type: 'pie',
         aggs: dataAgg
       });
@@ -179,7 +188,7 @@ aggArray.forEach(function (dataAgg, i) {
 
       data = buildHierarchicalData(stubVis, fixtures.threeTermBuckets);
 
-      vis.render(data);
+      vis.render(data, persistedState);
     }));
 
     afterEach(function () {
@@ -188,10 +197,10 @@ aggArray.forEach(function (dataAgg, i) {
     });
 
     describe('addPathEvents method', function () {
-      var path;
-      var d3selectedPath;
-      var onClick;
-      var onMouseOver;
+      let path;
+      let d3selectedPath;
+      let onClick;
+      let onMouseOver;
 
       beforeEach(function () {
         vis.handler.charts.forEach(function (chart) {
@@ -218,10 +227,10 @@ aggArray.forEach(function (dataAgg, i) {
     });
 
     describe('addPath method', function () {
-      var width;
-      var height;
-      var svg;
-      var slices;
+      let width;
+      let height;
+      let svg;
+      let slices;
 
       beforeEach(ngMock.inject(function () {
         vis.handler.charts.forEach(function (chart) {

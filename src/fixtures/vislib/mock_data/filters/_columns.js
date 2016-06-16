@@ -1,4 +1,4 @@
-var _ = require('lodash');
+import _ from 'lodash';
 
 module.exports = {
   'columns': [
@@ -8,6 +8,7 @@ module.exports = {
       'yAxisLabel': 'Count of documents',
       'series': [
         {
+          'label': 'Count',
           'values': [
             {
               'x': 'css',
@@ -41,6 +42,7 @@ module.exports = {
       'yAxisLabel': 'Count of documents',
       'series': [
         {
+          'label': 'Count',
           'values': [
             {
               'x': 'css',
@@ -74,6 +76,7 @@ module.exports = {
       'yAxisLabel': 'Count of documents',
       'series': [
         {
+          'label': 'Count',
           'values': [
             {
               'x': 'css',

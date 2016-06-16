@@ -1,6 +1,6 @@
+import { isWorker } from 'cluster';
 module.exports = async (kbnServer, server, config) => {
 
-  let { isWorker } = require('cluster');
 
   if (!isWorker) {
     throw new Error(`lazy optimization is only available in "watch" mode`);
@@ -21,15 +21,15 @@ module.exports = async (kbnServer, server, config) => {
    */
   switch (process.env.kbnWorkerType) {
     case 'optmzr':
-      await kbnServer.mixin(require('./optmzrRole'));
+      await kbnServer.mixin(require('./optmzr_role'));
       break;
 
     case 'server':
-      await kbnServer.mixin(require('./proxyRole'));
+      await kbnServer.mixin(require('./proxy_role'));
       break;
 
     default:
-      throw new Error(`unkown kbnWorkerType "${process.env.kbnWorkerType}"`);
+      throw new Error(`unknown kbnWorkerType "${process.env.kbnWorkerType}"`);
   }
 
 };

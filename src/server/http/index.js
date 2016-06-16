@@ -1,33 +1,17 @@
-module.exports = function (kbnServer, server, config) {
-  let _ = require('lodash');
-  let fs = require('fs');
-  let Boom = require('boom');
-  let Hapi = require('hapi');
-  let parse = require('url').parse;
-  let format = require('url').format;
+import { parse } from 'url';
+import { format } from 'url';
+import _ from 'lodash';
+import fs from 'fs';
+import Boom from 'boom';
+import Hapi from 'hapi';
+import getDefaultRoute from './get_default_route';
+module.exports = async function (kbnServer, server, config) {
 
-  let getDefaultRoute = require('./getDefaultRoute');
 
   server = kbnServer.server = new Hapi.Server();
 
-  // Create a new connection
-  var connectionOptions = {
-    host: config.get('server.host'),
-    port: config.get('server.port'),
-    routes: {
-      cors: config.get('server.cors')
-    }
-  };
-
-  // enable tls if ssl key and cert are defined
-  if (config.get('server.ssl.key') && config.get('server.ssl.cert')) {
-    connectionOptions.tls = {
-      key: fs.readFileSync(config.get('server.ssl.key')),
-      cert: fs.readFileSync(config.get('server.ssl.cert'))
-    };
-  }
-
-  server.connection(connectionOptions);
+  const shortUrlLookup = require('./short_url_lookup')(server);
+  await kbnServer.mixin(require('./setup_connection'));
 
   // provide a simple way to expose static directories
   server.decorate('server', 'exposeStaticDir', function (routePath, dirPath) {
@@ -37,10 +21,11 @@ module.exports = function (kbnServer, server, config) {
       handler: {
         directory: {
           path: dirPath,
-          listing: true,
+          listing: false,
           lookupCompressed: true
         }
-      }
+      },
+      config: {auth: false}
     });
   });
 
@@ -51,7 +36,8 @@ module.exports = function (kbnServer, server, config) {
       method: 'GET',
       handler: {
         file: filePath
-      }
+      },
+      config: {auth: false}
     });
   });
 
@@ -82,11 +68,11 @@ module.exports = function (kbnServer, server, config) {
     let response = req.response;
 
     if (response.isBoom) {
-      response.output.headers['x-app-name'] = kbnServer.name;
-      response.output.headers['x-app-version'] = kbnServer.version;
+      response.output.headers['kbn-name'] = kbnServer.name;
+      response.output.headers['kbn-version'] = kbnServer.version;
     } else {
-      response.header('x-app-name', kbnServer.name);
-      response.header('x-app-version', kbnServer.version);
+      response.header('kbn-name', kbnServer.name);
+      response.header('kbn-version', kbnServer.version);
     }
 
     return reply.continue();
@@ -96,8 +82,8 @@ module.exports = function (kbnServer, server, config) {
     path: '/',
     method: 'GET',
     handler: function (req, reply) {
-      return reply.view('rootRedirect', {
-        hashRoute: '/app/kibana',
+      return reply.view('root_redirect', {
+        hashRoute: `${config.get('server.basePath')}/app/kibana`,
         defaultRoute: getDefaultRoute(kbnServer),
       });
     }
@@ -119,4 +105,32 @@ module.exports = function (kbnServer, server, config) {
       .permanent(true);
     }
   });
+
+  server.route({
+    method: 'GET',
+    path: '/goto/{urlId}',
+    handler: async function (request, reply) {
+      try {
+        const url = await shortUrlLookup.getUrl(request.params.urlId);
+        reply().redirect(config.get('server.basePath') + url);
+      } catch (err) {
+        reply(err);
+      }
+    }
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/shorten',
+    handler: async function (request, reply) {
+      try {
+        const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
+        reply(urlId);
+      } catch (err) {
+        reply(err);
+      }
+    }
+  });
+
+  return kbnServer.mixin(require('./xsrf'));
 };

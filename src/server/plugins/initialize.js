@@ -1,5 +1,6 @@
+import pluginInit from './plugin_init';
+
 module.exports = async function (kbnServer, server, config) {
-  let { includes, keys } = require('lodash');
 
   if (!config.get('plugins.initialize')) {
     server.log(['info'], 'Plugin initialization disabled.');
@@ -7,31 +8,15 @@ module.exports = async function (kbnServer, server, config) {
   }
 
   let { plugins } = kbnServer;
-  let path = [];
 
-  async function initialize(id) {
-    let plugin = plugins.byId[id];
+  // extend plugin apis with additional context
+  plugins.getPluginApis().forEach(api => {
 
-    if (includes(path, id)) {
-      throw new Error(`circular dependencies found: "${path.concat(id).join(' -> ')}"`);
-    }
+    Object.defineProperty(api, 'uiExports', {
+      value: kbnServer.uiExports
+    });
 
-    path.push(id);
+  });
 
-    for (let reqId of plugin.requiredIds) {
-      if (!plugins.byId[reqId]) {
-        throw new Error(`Unmet requirement "${reqId}" for plugin "${id}"`);
-      }
-
-      await initialize(reqId);
-    }
-
-    await plugin.init();
-
-    path.pop();
-  };
-
-  for (let {id} of plugins) {
-    await initialize(id);
-  }
+  await pluginInit(plugins);
 };

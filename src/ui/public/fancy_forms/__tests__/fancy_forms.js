@@ -1,14 +1,14 @@
-var $ = require('jquery');
-var ngMock = require('ngMock');
-var expect = require('expect.js');
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import $ from 'jquery';
 
 describe('fancy forms', function () {
-  var $el;
-  var $scope;
-  var $compile;
-  var $rootScope;
-  var ngForm;
-  var ngModel;
+  let $el;
+  let $scope;
+  let $compile;
+  let $rootScope;
+  let ngForm;
+  let ngModel;
 
   function generateEl() {
     return $('<form>').html(
@@ -57,46 +57,6 @@ describe('fancy forms', function () {
       $el.find('input').blur();
       $scope.$apply();
       expect(ngForm.describeErrors()).to.be('1 Error');
-    });
-  });
-
-  describe('ngModelController', function () {
-    it('gives access to the ngFormController', function () {
-      expect(ngModel.$getForm()).to.be(ngForm);
-    });
-
-    it('allows setting the model dirty', function () {
-      expect($el.find('input.ng-dirty')).to.have.length(0);
-      ngModel.$setDirty();
-      expect($el.find('input.ng-dirty')).to.have.length(1);
-    });
-
-    it('sets the model dirty when it moves from valid to invalid', function () {
-      // clear out the old scope/el
-      $scope.$destroy();
-      $el = generateEl();
-      $scope = $rootScope.$new();
-
-      // start with a valid value
-      $scope.val = 'something';
-      $compile($el)($scope);
-      $rootScope.$apply();
-
-      // ensure that the field is valid and pristinve
-      var $valid = $el.find('input.ng-valid');
-      expect($valid).to.have.length(1);
-      expect($valid.hasClass('ng-pristine')).to.be(true);
-      expect($valid.hasClass('ng-dirty')).to.be(false);
-
-      // remove the value without actually setting the view model
-      $scope.val = null;
-      $rootScope.$apply();
-
-      // ensure that the field is now invalid and dirty
-      var $invalid = $el.find('input.ng-invalid');
-      expect($invalid).to.have.length(1);
-      expect($valid.hasClass('ng-pristine')).to.be(false);
-      expect($valid.hasClass('ng-dirty')).to.be(true);
     });
   });
 });

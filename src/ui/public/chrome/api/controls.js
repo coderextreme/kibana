@@ -1,4 +1,4 @@
-var _ = require('lodash');
+import _ from 'lodash';
 
 module.exports = function (chrome, internals) {
   /**
@@ -9,6 +9,9 @@ module.exports = function (chrome, internals) {
    *   Visible
    *     determines if the Kibana chrome should be displayed
    */
+
+  let def = true;
+  internals.setVisibleDefault = (_def) => def = Boolean(_def);
 
   /**
    * @param {boolean} display - should the chrome be displayed
@@ -23,7 +26,7 @@ module.exports = function (chrome, internals) {
    * @return {boolean} - display state of the chrome
    */
   chrome.getVisible = function () {
-    if (_.isUndefined(internals.visible)) return true;
+    if (_.isUndefined(internals.visible)) return def;
     return internals.visible;
   };
 };

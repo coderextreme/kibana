@@ -11,6 +11,8 @@ if the splits are displayed in a row or a column by clicking the *Rows | Columns
 
 include::x-axis-aggs.asciidoc[]
 
+include::color-picker.asciidoc[]
+
 You can click the *Advanced* link to display more customization options for your metrics or bucket aggregation:
 
 *Exclude Pattern*:: Specify a pattern in this field to exclude from the results.
@@ -48,15 +50,21 @@ values.
 *Scale Y-Axis to Data Bounds*:: The default Y-axis bounds are zero and the maximum value returned in the data. Check 
 this box to change both upper and lower bounds to match the values returned in the data.
 
-After changing options, click the green *Apply changes* button to update your visualization, or the grey *Discard 
+After changing options, click the  *Apply changes* button to update your visualization, or the grey *Discard 
 changes* button to keep your visualization in its current state.
 
 [float]
 [[bubble-chart]]
-=== Bubble Charts
+==== Bubble Charts
 You can convert a line chart visualization to a bubble chart by performing the following steps:
 
 . Click *Add Metrics* for the visualization's Y axis, then select *Dot Size*.
 . Select a metric aggregation from the drop-down list.
 . In the *Options* tab, uncheck the *Show Connecting Lines* box.
 . Click the *Apply changes* button.
+
+[float]
+[[line-viewing-detailed-information]]
+==== Viewing Detailed Information
+
+include::visualization-raw-data.asciidoc[]

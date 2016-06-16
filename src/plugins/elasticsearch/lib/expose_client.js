@@ -1,53 +1,88 @@
-var elasticsearch = require('elasticsearch');
-var _ = require('lodash');
-var fs = require('fs');
-var util = require('util');
-var url = require('url');
+import elasticsearch from 'elasticsearch';
+import _ from 'lodash';
+import Bluebird from 'bluebird';
+const readFile = (file) => require('fs').readFileSync(file, 'utf8');
+import util from 'util';
+import url from 'url';
+import callWithRequest from './call_with_request';
+import filterHeaders from './filter_headers';
 
 module.exports = function (server) {
-  var config = server.config();
-  var uri = url.parse(config.get('elasticsearch.url'));
-  var username = config.get('elasticsearch.username');
-  var password = config.get('elasticsearch.password');
-  var verifySsl = config.get('elasticsearch.ssl.verify');
-  var clientCrt = config.get('elasticsearch.ssl.cert');
-  var clientKey = config.get('elasticsearch.ssl.key');
-  var ca = config.get('elasticsearch.ssl.ca');
-  var apiVersion = config.get('elasticsearch.apiVersion');
+  const config = server.config();
 
-  if (username && password) {
-    uri.auth = util.format('%s:%s', username, password);
-  }
-
-  var ssl = { rejectUnauthorized: verifySsl };
-  if (clientCrt && clientKey) {
-    ssl.cert = fs.readFileSync(clientCrt, 'utf8');
-    ssl.key = fs.readFileSync(clientKey, 'utf8');
-  }
-  if (ca) {
-    ssl.ca = fs.readFileSync(ca, 'utf8');
-  }
-
-  var client = new elasticsearch.Client({
-    host: url.format(uri),
-    ssl: ssl,
-    apiVersion: apiVersion,
-    log: function () {
-      this.error = function (err) {
-        server.log(['error', 'elasticsearch'], err);
-      };
-      this.warning = function (message) {
-        server.log(['warning', 'elasticsearch'], message);
-      };
-      this.info = _.noop;
-      this.debug = _.noop;
-      this.trace = _.noop;
-      this.close = _.noop;
+  class ElasticsearchClientLogging {
+    error(err) {
+      server.log(['error', 'elasticsearch'], err);
     }
-  });
+    warning(message) {
+      server.log(['warning', 'elasticsearch'], message);
+    }
+    info() {}
+    debug() {}
+    trace() {}
+    close() {}
+  }
 
+  function createClient(options) {
+    options = _.defaults(options || {}, {
+      url: config.get('elasticsearch.url'),
+      username: config.get('elasticsearch.username'),
+      password: config.get('elasticsearch.password'),
+      verifySsl: config.get('elasticsearch.ssl.verify'),
+      clientCrt: config.get('elasticsearch.ssl.cert'),
+      clientKey: config.get('elasticsearch.ssl.key'),
+      ca: config.get('elasticsearch.ssl.ca'),
+      apiVersion: config.get('elasticsearch.apiVersion'),
+      pingTimeout: config.get('elasticsearch.pingTimeout'),
+      requestTimeout: config.get('elasticsearch.requestTimeout'),
+      keepAlive: true,
+      auth: true
+    });
+
+    const uri = url.parse(options.url);
+
+    let authorization;
+    if (options.auth && options.username && options.password) {
+      uri.auth = util.format('%s:%s', options.username, options.password);
+    }
+
+    const ssl = { rejectUnauthorized: options.verifySsl };
+    if (options.clientCrt && options.clientKey) {
+      ssl.cert = readFile(options.clientCrt);
+      ssl.key = readFile(options.clientKey);
+    }
+    if (options.ca) {
+      ssl.ca = options.ca.map(readFile);
+    }
+
+    return new elasticsearch.Client({
+      host: url.format(uri),
+      ssl: ssl,
+      plugins: options.plugins,
+      apiVersion: options.apiVersion,
+      keepAlive: options.keepAlive,
+      pingTimeout: options.pingTimeout,
+      requestTimeout: options.requestTimeout,
+      defer: function () {
+        return Bluebird.defer();
+      },
+      log: ElasticsearchClientLogging
+    });
+  }
+
+  const client = createClient();
   server.on('close', _.bindKey(client, 'close'));
+
+  const noAuthClient = createClient({ auth: false });
+  server.on('close', _.bindKey(noAuthClient, 'close'));
+
+  server.expose('ElasticsearchClientLogging', ElasticsearchClientLogging);
   server.expose('client', client);
+  server.expose('createClient', createClient);
+  server.expose('callWithRequestFactory', _.partial(callWithRequest, server));
+  server.expose('callWithRequest', callWithRequest(server, noAuthClient));
+  server.expose('filterHeaders', filterHeaders);
+  server.expose('errors', elasticsearch.errors);
 
   return client;
 

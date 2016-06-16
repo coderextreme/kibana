@@ -1,18 +1,24 @@
+import $ from 'jquery';
+import _ from 'lodash';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import sinon from 'auto-release-sinon';
+import tabifyPm from 'ui/agg_response/tabify/tabify';
+import AggResponseTabifyTableGroupProvider from 'ui/agg_response/tabify/_table_group';
+import VisProvider from 'ui/vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import StateManagementAppStateProvider from 'ui/state_management/app_state';
 describe('Controller', function () {
-  var $ = require('jquery');
-  var _ = require('lodash');
-  var expect = require('expect.js');
-  var ngMock = require('ngMock');
-  var sinon = require('auto-release-sinon');
 
-  var $rootScope;
-  var TableGroup;
-  var $compile;
-  var Private;
-  var $scope;
-  var $el;
-  var Vis;
-  var fixtures;
+  let $rootScope;
+  let TableGroup;
+  let $compile;
+  let Private;
+  let $scope;
+  let $el;
+  let Vis;
+  let fixtures;
+  let AppState;
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
   beforeEach(ngMock.inject(function ($injector) {
@@ -20,13 +26,14 @@ describe('Controller', function () {
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
-    TableGroup = Private(require('ui/agg_response/tabify/_table_group'));
-    Vis = Private(require('ui/Vis'));
+    AppState = Private(StateManagementAppStateProvider);
+    TableGroup = Private(AggResponseTabifyTableGroupProvider);
+    Vis = Private(VisProvider);
   }));
 
   function OneRangeVis(params) {
     return new Vis(
-      Private(require('fixtures/stubbed_logstash_index_pattern')),
+      Private(FixturesStubbedLogstashIndexPatternProvider),
       {
         type: 'table',
         params: params || {},
@@ -53,6 +60,7 @@ describe('Controller', function () {
     vis.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
 
     $rootScope.vis = vis;
+    $rootScope.uiState = new AppState({uiState: {}}).makeStateful('uiState');
     $rootScope.newScope = function (scope) { $scope = scope; };
 
     $el = $('<div>')
@@ -99,11 +107,28 @@ describe('Controller', function () {
     expect(!$scope.tableGroups).to.be.ok();
   });
 
+  it('sets the sort on the scope when it is passed as a vis param', function () {
+    const sortObj = {
+      columnIndex: 1,
+      direction: 'asc'
+    };
+    initController(new OneRangeVis({sort: sortObj}));
+
+    // modify the data to not have any buckets
+    const resp = _.cloneDeep(fixtures.oneRangeBucket);
+    resp.aggregations.agg_2.buckets = {};
+
+    attachEsResponseToScope(resp);
+
+    expect($scope.sort.columnIndex).to.equal(sortObj.columnIndex);
+    expect($scope.sort.direction).to.equal(sortObj.direction);
+  });
+
   it('sets #hasSomeRows properly if the table group is empty', function () {
     initController(new OneRangeVis());
 
     // modify the data to not have any buckets
-    var resp = _.cloneDeep(fixtures.oneRangeBucket);
+    const resp = _.cloneDeep(fixtures.oneRangeBucket);
     resp.aggregations.agg_2.buckets = {};
 
     attachEsResponseToScope(resp);
@@ -114,11 +139,10 @@ describe('Controller', function () {
 
   it('passes partialRows:true to tabify based on the vis params', function () {
     // spy on the tabify private module
-    var tabifyPm = require('ui/agg_response/tabify/tabify');
-    var spiedTabify = sinon.spy(Private(tabifyPm));
+    const spiedTabify = sinon.spy(Private(tabifyPm));
     Private.stub(tabifyPm, spiedTabify);
 
-    var vis = new OneRangeVis({ showPartialRows: true });
+    const vis = new OneRangeVis({ showPartialRows: true });
     initController(vis);
     attachEsResponseToScope(fixtures.oneRangeBucket);
 
@@ -128,11 +152,10 @@ describe('Controller', function () {
 
   it('passes partialRows:false to tabify based on the vis params', function () {
     // spy on the tabify private module
-    var tabifyPm = require('ui/agg_response/tabify/tabify');
-    var spiedTabify = sinon.spy(Private(tabifyPm));
+    const spiedTabify = sinon.spy(Private(tabifyPm));
     Private.stub(tabifyPm, spiedTabify);
 
-    var vis = new OneRangeVis({ showPartialRows: false });
+    const vis = new OneRangeVis({ showPartialRows: false });
     initController(vis);
     attachEsResponseToScope(fixtures.oneRangeBucket);
 
@@ -142,11 +165,10 @@ describe('Controller', function () {
 
   it('passes partialRows:true to tabify based on the vis params', function () {
     // spy on the tabify private module
-    var tabifyPm = require('ui/agg_response/tabify/tabify');
-    var spiedTabify = sinon.spy(Private(tabifyPm));
+    const spiedTabify = sinon.spy(Private(tabifyPm));
     Private.stub(tabifyPm, spiedTabify);
 
-    var vis = new OneRangeVis({ showPartialRows: true });
+    const vis = new OneRangeVis({ showPartialRows: true });
     initController(vis);
     attachEsResponseToScope(fixtures.oneRangeBucket);
 
@@ -156,11 +178,10 @@ describe('Controller', function () {
 
   it('passes partialRows:false to tabify based on the vis params', function () {
     // spy on the tabify private module
-    var tabifyPm = require('ui/agg_response/tabify/tabify');
-    var spiedTabify = sinon.spy(Private(tabifyPm));
+    const spiedTabify = sinon.spy(Private(tabifyPm));
     Private.stub(tabifyPm, spiedTabify);
 
-    var vis = new OneRangeVis({ showPartialRows: false });
+    const vis = new OneRangeVis({ showPartialRows: false });
     initController(vis);
     attachEsResponseToScope(fixtures.oneRangeBucket);
 

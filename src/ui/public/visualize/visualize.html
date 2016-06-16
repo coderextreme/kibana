@@ -1,6 +1,4 @@
-<div class="spinner large" ng-show="vis.type.requiresSearch && searchSource.activeFetchCount > 0"></div>
-<div ng-if="vis.type.requiresSearch && esResp.hits.total === 0"
-  class="text-center visualize-error visualize-chart">
+<div ng-if="showNoResultsMessage()" class="text-center visualize-error visualize-chart">
   <div class="item top"></div>
   <div class="item">
     <h2 aria-hidden="true"><i aria-hidden="true" class="fa fa-meh-o"></i></h2>
@@ -8,8 +6,12 @@
   </div>
   <div class="item bottom"></div>
 </div>
-<div ng-hide="vis.type.requiresSearch && esResp.hits.total === 0"
-  ng-class="{ loading: vis.type.requiresSearch && searchSource.activeFetchCount > 0 }"
-  class="visualize-chart"></div>
+<div div ng-hide="showNoResultsMessage()" class="vis-container">
+  <div
+    ng-style="loadingStyle"
+    ng-class="{ loading: vis.type.requiresSearch && searchSource.activeFetchCount > 0 }"
+    class="visualize-chart"></div>
+  <visualize-legend></visualize-legend>
+</div>
 <!-- <pre>{{chartData | json}}</pre> -->
-<visualize-spy ng-if="vis.type.requiresSearch"></visualize-spy>
+<visualize-spy ng-if="vis.type.requiresSearch && showSpyPanel"></visualize-spy>

@@ -1,23 +1,27 @@
+import { values } from 'lodash';
+import _ from 'lodash';
+import ngMock from 'ng_mock';
+import expect from 'expect.js';
+import resp from 'fixtures/agg_resp/range';
+import AggTypesIndexProvider from 'ui/agg_types/index';
+import VisProvider from 'ui/vis';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import RegistryFieldFormatsProvider from 'ui/registry/field_formats';
 describe('Range Agg', function () {
-  var _ = require('lodash');
-  var ngMock = require('ngMock');
-  var expect = require('expect.js');
-  var values = require('lodash').values;
 
-  var resp = require('fixtures/agg_resp/range');
-  var buckets = values(resp.aggregations[1].buckets);
+  let buckets = values(resp.aggregations[1].buckets);
 
-  var range;
-  var Vis;
-  var indexPattern;
+  let range;
+  let Vis;
+  let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    range = Private(require('ui/agg_types/index')).byName.range;
-    Vis = Private(require('ui/Vis'));
-    indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+    range = Private(AggTypesIndexProvider).byName.range;
+    Vis = Private(VisProvider);
+    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-    var BytesFormat = Private(require('ui/registry/field_formats')).byId.bytes;
+    let BytesFormat = Private(RegistryFieldFormatsProvider).byId.bytes;
 
     indexPattern.fieldFormatMap.bytes = new BytesFormat({
       pattern: '0,0.[000] b'
@@ -28,7 +32,7 @@ describe('Range Agg', function () {
 
   describe('formating', function () {
     it('formats bucket keys properly', function () {
-      var vis = new Vis(indexPattern, {
+      let vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
           {
@@ -45,8 +49,8 @@ describe('Range Agg', function () {
         ]
       });
 
-      var agg = vis.aggs.byTypeName.range[0];
-      var format = function (val) {
+      let agg = vis.aggs.byTypeName.range[0];
+      let format = function (val) {
         return agg.fieldFormatter()(agg.getKey(val));
       };
       expect(format(buckets[0])).to.be('-∞ to 1 KB');

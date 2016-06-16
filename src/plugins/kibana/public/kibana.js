@@ -1,56 +1,46 @@
-require('plugins/kibana/discover/index');
-require('plugins/kibana/visualize/index');
-require('plugins/kibana/dashboard/index');
-require('plugins/kibana/settings/index');
-require('plugins/kibana/doc/index');
+// autoloading
 
-var chrome = require('ui/chrome');
-var routes = require('ui/routes');
-var modules = require('ui/modules');
+// preloading (for faster webpack builds)
+import moment from 'moment-timezone';
+import chrome from 'ui/chrome';
+import routes from 'ui/routes';
+import modules from 'ui/modules';
 
-var kibanaLogoUrl = require('ui/images/k3bana.png');
+import kibanaLogoUrl from 'ui/images/kibana.svg';
+import 'ui/autoload/all';
+import 'plugins/kibana/discover/index';
+import 'plugins/kibana/visualize/index';
+import 'plugins/kibana/dashboard/index';
+import 'plugins/kibana/management/index';
+import 'plugins/kibana/doc';
+import 'ui/vislib';
+import 'ui/agg_response';
+import 'ui/agg_types';
+import 'ui/timepicker';
+import 'leaflet';
+
+routes.enable();
 
 routes
 .otherwise({
-  redirectTo: '/discover'
+  redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
 });
 
 chrome
-.setBrand({
-  'logo': 'url(' + kibanaLogoUrl + ') left no-repeat',
-  'smallLogo': 'url(' + kibanaLogoUrl + ') left no-repeat'
-})
-.setNavBackground('#222222')
 .setTabDefaults({
   resetWhenActive: true,
-  trackLastPath: true,
+  lastUrlStore: window.sessionStorage,
   activeIndicatorColor: '#656a76'
 })
-.setTabs([
-  {
-    id: 'discover',
-    title: 'Discover'
-  },
-  {
-    id: 'visualize',
-    title: 'Visualize',
-    activeIndicatorColor: function () {
-      return (String(this.lastUrl).indexOf('/visualize/step/') === 0) ? 'white' : '#656a76';
-    }
-  },
-  {
-    id: 'dashboard',
-    title: 'Dashboard'
-  },
-  {
-    id: 'settings',
-    title: 'Settings'
-  }
-])
-.setRootController('kibana', function ($scope, courier) {
+.setRootController('kibana', function ($scope, courier, config) {
   // wait for the application to finish loading
   $scope.$on('application.load', function () {
     courier.start();
   });
-});
 
+  config.watch('dateFormat:tz', setDefaultTimezone, $scope);
+
+  function setDefaultTimezone(tz) {
+    moment.tz.setDefault(tz);
+  }
+});

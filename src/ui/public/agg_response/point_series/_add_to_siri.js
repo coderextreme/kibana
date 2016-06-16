@@ -1,17 +1,15 @@
-define(function (require) {
-  return function PointSeriesAddToSiri() {
-    return function addToSiri(series, point, id, label) {
-      id = id == null ? '' : id + '';
+export default function PointSeriesAddToSiri() {
+  return function addToSiri(series, point, id, label) {
+    id = id == null ? '' : id + '';
 
-      if (series[id]) {
-        series[id].values.push(point);
-        return;
-      }
+    if (series.has(id)) {
+      series.get(id).values.push(point);
+      return;
+    }
 
-      series[id] = {
-        label: label == null ? id : label,
-        values: [point]
-      };
-    };
+    series.set(id, {
+      label: label == null ? id : label,
+      values: [point]
+    });
   };
-});
+};

@@ -1,19 +1,19 @@
-var angular = require('angular');
-var $ = require('jquery');
-var sinon = require('sinon');
-var expect = require('expect.js');
-var ngMock = require('ngMock');
+import angular from 'angular';
+import sinon from 'sinon';
+import expect from 'expect.js';
+import ngMock from 'ng_mock';
+import $ from 'jquery';
+import 'ui/directives/confirm_click';
+import 'plugins/kibana/discover/index';
 
-require('ui/directives/confirm_click');
-require('plugins/kibana/discover/index');
 
-var $parentScope;
+let $parentScope;
 
-var $scope;
+let $scope;
 
-var $elem;
+let $elem;
 
-var init = function (text) {
+let init = function (text) {
   // Load the application
   ngMock.module('kibana');
 
@@ -47,7 +47,7 @@ describe('confirmClick directive', function () {
 
 
   describe('event handlers', function () {
-    var events;
+    let events;
 
     beforeEach(function () {
       init();
@@ -71,7 +71,7 @@ describe('confirmClick directive', function () {
 
 
   describe('confirmed', function () {
-    var confirmed;
+    let confirmed;
 
     beforeEach(function () {
       init();
@@ -98,7 +98,7 @@ describe('confirmClick directive', function () {
   });
 
   describe('not confirmed', function () {
-    var confirmed;
+    let confirmed;
 
     beforeEach(function () {
       init();
