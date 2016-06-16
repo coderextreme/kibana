@@ -1,6 +1,6 @@
 {
   "name": "k3bana",
-  "version": "4.1.1",
+  "version": "5.0.1",
   "homepage": "https://github.com/coderextreme/kibana",
   "description": "JSON visualization",
   "keywords": [
@@ -17,6 +17,6 @@
     "tests"
   ],
   "dependencies": {
-    "x3dom": "x3dom/x3dom#1.7.0"
+    "x3dom": "x3dom/x3dom#1.7.1"
   }
 }

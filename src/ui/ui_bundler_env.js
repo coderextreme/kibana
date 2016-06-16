@@ -40,8 +40,7 @@ module.exports = class UiBundlerEnv {
     // regular expressions which will prevent webpack from parsing the file
     this.noParse = [
       /node_modules[\/\\](angular|elasticsearch-browser)[\/\\]/,
-      /node_modules[\/\\](angular-nvd3)[\/\\]/,
-      /node_modules[\/\\](x3dom)[\/\\]/
+      /bower_components[\/\\](x3dom)[\/\\]/,
       /node_modules[\/\\](mocha|moment)[\/\\]/
     ];
 
