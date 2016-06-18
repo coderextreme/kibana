@@ -1,19 +1,19 @@
-define(function (require) {
-  return function CrossHandler(Private) {
-    var Handler = Private(require('ui/vislib/lib/handler/handler'));
-    var Data = Private(require('ui/vislib/lib/data'));
-    var Legend = Private(require('ui/vislib/lib/legend'));
-    var ChartTitle = Private(require('ui/vislib/lib/chart_title'));
+import VislibLibHandlerHandlerProvider from 'ui/vislib/lib/handler/handler';
+import VislibLibDataProvider from 'ui/vislib/lib/data';
+import VislibLibChartTitleProvider from 'ui/vislib/lib/chart_title';
 
-    /*
-     * Handler for Cross visualizations.
-     */
+export default function CrossHandler(Private) {
+  let Handler = Private(VislibLibHandlerHandlerProvider);
+  let Data = Private(VislibLibDataProvider);
+  let ChartTitle = Private(VislibLibChartTitleProvider);
 
-    return function (vis) {
-      return new Handler(vis, {
-        legend: new Legend(vis),
-        chartTitle: new ChartTitle(vis.el)
-      });
-    };
+  /*
+   * Handler for Cross visualizations.
+   */
+
+  return function (vis) {
+    return new Handler(vis, {
+      chartTitle: new ChartTitle(vis.el)
+    });
   };
-});
+};
