@@ -11,14 +11,15 @@ export default function () {
   _.each(self.getScriptedFields(), function (field) {
     scriptFields[field.name] = {
       script: {
-        script: field.script,
+        inline: field.script,
         lang: field.lang
       }
     };
   });
 
   return {
-    fields: ['*', '_source'],
+    storedFields: ['*'],
+    _source: true,
     scriptFields: scriptFields,
     fielddataFields: fielddataFields
   };

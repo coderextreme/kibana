@@ -2,8 +2,18 @@ const _ = require('lodash');
 const visualRegression = require('../utilities/visual_regression');
 
 module.exports = function (grunt) {
+  grunt.registerTask('test:visualRegression', [
+    'intern:visualRegression:takeScreenshots',
+    'test:visualRegression:buildGallery'
+  ]);
+
+  grunt.registerTask('test:visualRegression:takeScreenshots', [
+    'clean:screenshots',
+    'intern:visualRegression'
+  ]);
+
   grunt.registerTask(
-    'test:visualRegression',
+    'test:visualRegression:buildGallery',
     'Compare screenshots and generate diff images.',
     function () {
       const done = this.async();
@@ -30,20 +40,18 @@ module.exports = function (grunt) {
   grunt.registerTask('test:ui', [
     'esvm:ui',
     'run:testUIServer',
-    'downloadSelenium',
-    'run:seleniumServer',
+    'run:chromeDriver',
     'clean:screenshots',
     'intern:dev',
     'esvm_shutdown:ui',
-    'stop:seleniumServer',
+    'stop:chromeDriver',
     'stop:testUIServer'
   ]);
 
   grunt.registerTask('test:ui:server', [
     'esvm:ui',
     'run:testUIServer',
-    'downloadSelenium',
-    'run:devSeleniumServer:keepalive'
+    'run:devChromeDriver:keepalive'
   ]);
 
   grunt.registerTask('test:ui:runner', [
