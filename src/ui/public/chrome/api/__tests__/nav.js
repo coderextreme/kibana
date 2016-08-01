@@ -45,6 +45,48 @@ describe('chrome nav apis', function () {
     });
   });
 
+  describe('#removeBasePath', () => {
+    it ('returns the given URL as-is when no basepath is set', () => {
+      const basePath = '';
+      const { chrome } = init({ basePath });
+      expect(chrome.removeBasePath('/app/kibana?a=b')).to.be('/app/kibana?a=b');
+    });
+
+    it ('returns the given URL with the basepath stripped out when basepath is set', () => {
+      const { chrome } = init();
+      expect(chrome.removeBasePath(`${basePath}/app/kibana?a=b`)).to.be('/app/kibana?a=b');
+    });
+  });
+
+  describe('#getNavLinkById', () => {
+    it ('retrieves the correct nav link, given its ID', () => {
+      const appUrlStore = new StubBrowserStorage();
+      const nav = [
+        { id: 'kibana:discover', title: 'Discover' }
+      ];
+      const { chrome, internals } = init({ appUrlStore, nav });
+
+      const navLink = chrome.getNavLinkById('kibana:discover');
+      expect(navLink).to.eql(nav[0]);
+    });
+
+    it ('throws an error if the nav link with the given ID is not found', () => {
+      const appUrlStore = new StubBrowserStorage();
+      const nav = [
+        { id: 'kibana:discover', title: 'Discover' }
+      ];
+      const { chrome, internals } = init({ appUrlStore, nav });
+
+      let errorThrown = false;
+      try {
+        const navLink = chrome.getNavLinkById('nonexistent');
+      } catch (e) {
+        errorThrown = true;
+      }
+      expect(errorThrown).to.be(true);
+    });
+  });
+
   describe('internals.trackPossibleSubUrl()', function () {
     it('injects the globalState of the current url to all links for the same app', function () {
       const appUrlStore = new StubBrowserStorage();

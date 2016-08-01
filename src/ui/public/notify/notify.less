@@ -25,7 +25,6 @@
         }
       }
     }
-
   }
 
   .alert {
@@ -45,35 +44,36 @@
         margin-right: 4px;
       }
     }
+  }
 
-    &-message {
-      flex: 1 1 auto;
-      .ellipsis();
-      line-height: normal;
+  .toast-message {
+    flex: 1 1 auto;
+    margin-top: 10px;
+    .ellipsis();
+    line-height: normal;
+  }
+
+  .toast-stack {
+    padding-bottom: 10px;
+
+    pre {
+      display: inline-block;
+      width: 100%;
+      margin: 10px 0;
+      word-break: normal;
+      word-wrap: normal;
+      white-space: pre-wrap;
     }
+  }
 
-    &-stack {
-      padding-bottom: 10px;
+  .toast-controls {
+    display: flex;
 
-      pre {
-        display: inline-block;
-        width: 100%;
-        margin: 10px 0;
-        word-break: normal;
-        word-wrap: normal;
-        white-space: pre-wrap;
-      }
-    }
-
-    &-controls {
-      display: flex;
-
-      button {
-        flex: 0 0 auto;
-        border: 0;
-        border-radius: 0;
-        padding: 10px 15px;
-      }
+    button {
+      flex: 0 0 auto;
+      border: 0;
+      border-radius: 0;
+      padding: 10px 15px;
     }
   }
 

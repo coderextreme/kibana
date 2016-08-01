@@ -1,7 +1,8 @@
 export default (grunt) => {
   const VERSION = grunt.config.get('build.version');
+  const SHORT_SHA = grunt.config.get('build.sha').substr(0, 7);
 
-  const FOLDER_STAGING = `kibana/staging/${VERSION.match(/\d\.\d\.\d/)[0]}-XXXXXXX/repos/${VERSION.match(/\d\./)[0]}x`;
+  const FOLDER_STAGING = `kibana/staging/${VERSION}-${SHORT_SHA}/repos/${VERSION.match(/\d\./)[0]}x`;
   const FOLDER_PRODUCTION = `kibana/${VERSION.match(/\d\./)[0]}x`;
 
   const FOLDERNAME_DEB = 'debian';
@@ -14,7 +15,9 @@ export default (grunt) => {
 
   const FOLDER_CONFIG = '/etc/kibana';
   const FOLDER_HOME = '/usr/share/kibana';
-  const FOLDER_PLUGINS = `${FOLDER_HOME}/installedPlugins`;
+  const FOLDER_DATA = '/var/lib/kibana';
+  const FOLDER_LOGS = '/var/log/kibana';
+  const FOLDER_PLUGINS = `${FOLDER_HOME}/plugins`;
 
   const FILE_KIBANA_CONF = `${FOLDER_CONFIG}/kibana.yml`;
   const FILE_KIBANA_BINARY = `${FOLDER_HOME}/bin/kibana`;
@@ -28,8 +31,8 @@ export default (grunt) => {
       },
       production: {
         bucket: 'packages.elasticsearch.org',
-        debPrefix: PREFIX_STAGING_DEB,
-        rpmPrefix: PREFIX_STAGING_RPM
+        debPrefix: PREFIX_PRODUCTION_DEB,
+        rpmPrefix: PREFIX_PRODUCTION_RPM
       }
     },
     user: 'kibana',
@@ -43,7 +46,9 @@ export default (grunt) => {
     version: VERSION,
     path: {
       conf: FOLDER_CONFIG,
+      data: FOLDER_DATA,
       plugins: FOLDER_PLUGINS,
+      logs: FOLDER_LOGS,
       home: FOLDER_HOME,
       kibanaBin: FILE_KIBANA_BINARY,
       kibanaConfig: FILE_KIBANA_CONF
