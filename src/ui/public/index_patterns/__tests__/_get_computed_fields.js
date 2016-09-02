@@ -30,10 +30,13 @@ describe('get computed fields', function () {
     expect(fn()._source).to.be(true);
   });
 
-  it('should request date fields as fielddata_fields', function () {
-    expect(fn().fielddataFields).to.contain('@timestamp');
-    expect(fn().fielddataFields).to.not.include.keys('bytes');
+  it('should request date fields as docvalue_fields', function () {
+    expect(fn().docvalueFields).to.contain('@timestamp');
+    expect(fn().docvalueFields).to.not.contain('bytes');
   });
 
+  it('should not request scripted date fields as docvalue_fields', function () {
+    expect(fn().docvalueFields).to.not.contain('script date');
+  });
 
 });

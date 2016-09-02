@@ -1,15 +1,18 @@
 import $ from 'jquery';
+import { remove } from 'lodash';
 
+import './kbn_chrome.less';
 import UiModules from 'ui/modules';
+import { isSystemApiRequest } from 'ui/system_api';
 
 export default function (chrome, internals) {
 
   UiModules
   .get('kibana')
-  .directive('kbnChrome', function ($rootScope) {
+  .directive('kbnChrome', $rootScope => {
     return {
       template($el) {
-        const $content = $(require('ui/chrome/chrome.html'));
+        const $content = $(require('./kbn_chrome.html'));
         const $app = $content.find('.application');
 
         if (internals.rootController) {
@@ -40,9 +43,14 @@ export default function (chrome, internals) {
         $rootScope.$on('$routeUpdate', onRouteChange);
         onRouteChange();
 
+        const allPendingHttpRequests = () => $http.pendingRequests;
+        const removeSystemApiRequests = (pendingHttpRequests = []) => remove(pendingHttpRequests, isSystemApiRequest);
+        $scope.$watchCollection(allPendingHttpRequests, removeSystemApiRequests);
+
         // and some local values
         chrome.httpActive = $http.pendingRequests;
         $scope.notifList = require('ui/notify')._notifs;
+
         return chrome;
       }
     };
